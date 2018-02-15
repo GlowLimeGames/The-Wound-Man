@@ -23,8 +23,10 @@ public class TargetController : MonoBehaviour {
         {
             // TODO: Do things with animus
             Destroy(_gm.itemOnMouse.gameObject);
-            _gm.itemOnMouse = null;
+            
             Destroy(this.gameObject);
+
+            _gm.itemOnMouse = null;
         }
     }
 

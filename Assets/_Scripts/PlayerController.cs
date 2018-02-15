@@ -4,6 +4,9 @@ using UnityEngine;
 
 public class PlayerController : MonoBehaviour {
 
+    public ItemController[] inventory;
+
+    private GameController _gm;
 	private float _moveSpeed = 3.0f;
 	private Vector3 _moveTarget;
 
@@ -12,7 +15,10 @@ public class PlayerController : MonoBehaviour {
 
 	// Use this for initialization
 	void Start () {
-		_moveTarget = transform.position;
+        inventory = GetComponentsInChildren<ItemController>();
+
+        _gm = GameObject.Find("GameController").GetComponent<GameController>();
+        _moveTarget = transform.position;
 		_keyboardLast = true;
 	}
 	
@@ -26,27 +32,44 @@ public class PlayerController : MonoBehaviour {
 
 		} else {
 
-			if (Input.GetMouseButtonDown (0)) {
-				_keyboardLast = false;
-				Camera cam = Camera.main;
-				_moveTarget = cam.ScreenToWorldPoint (Input.mousePosition);
-				_moveTarget.y = transform.position.y;   // Don't move vertically at all
-				_moveTarget.z = transform.position.z;
+            if (_gm.itemOnMouse == null)
+            {
+                if (Input.GetMouseButtonDown(0))
+                {
+                    _keyboardLast = false;
+                    Camera cam = Camera.main;
+                    _moveTarget = cam.ScreenToWorldPoint(Input.mousePosition);
+                    _moveTarget.y = transform.position.y;   // Don't move vertically at all
+                    _moveTarget.z = transform.position.z;
 
-			}
+                }
 
-			float _targetDelta = _moveTarget.x - transform.position.x;
+                float _targetDelta = _moveTarget.x - transform.position.x;
 
-			// Only move toward the mouse target if the keyboard's not being used now
-			if (!_keyboardLast) {
-				if (Mathf.Abs (_targetDelta) > 0.5f) {
-					transform.position = Vector3.MoveTowards (transform.position, _moveTarget, _moveSpeed * Time.deltaTime);
-				} else {
-					transform.position = transform.position;
-				}
-			}
+                // Only move toward the mouse target if the keyboard's not being used now
+                if (!_keyboardLast)
+                {
+                    if (Mathf.Abs(_targetDelta) > 0.5f)
+                    {
+                        transform.position = Vector3.MoveTowards(transform.position, _moveTarget, _moveSpeed * Time.deltaTime);
+                    }
+                    else
+                    {
+                        transform.position = transform.position;
+                    }
+                }
+
+            }
 
 		}
 
 	}
+
+    void OnMouseDown()
+    {
+        if (_gm.itemOnMouse != null)
+        {
+            _gm.itemOnMouse.ReturnToBody();
+        }
+    }
 }
