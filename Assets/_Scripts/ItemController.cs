@@ -1,11 +1,20 @@
 ﻿using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using UnityEngine.UI;
 
 public class ItemController : MonoBehaviour {
 
-    public int lethality;
-    public int efficiency;
+    public float lethality;
+    public float efficiency;
+
+    public enum Quality
+    {
+        Sharp,
+        Heavy,
+        Narrow,
+    };
+    public Quality quality;
 
     // Tooltip prefab
     public Transform tooltip;
@@ -22,7 +31,7 @@ public class ItemController : MonoBehaviour {
     private Vector3 originalPos;
     private Vector3 originalLocalPos;
 
-    private static Vector3 tooltipPos = new Vector3(0, 350, 0);
+    private static Vector3 tooltipPos = new Vector3(0, 300, 0);
 
     public void TakeFromBody()
     {
@@ -54,9 +63,8 @@ public class ItemController : MonoBehaviour {
         originalPos = transform.position;
         originalLocalPos = transform.localPosition;
 
-        // TODO Don't hard-code
-        lethality = 9;
-        efficiency = 7;
+        lethality = Random.value * 10.0f;
+        efficiency = Random.value * 10.0f;
 
         _gm = GameObject.Find("GameController").GetComponent<GameController>();
         _cam = Camera.main;
@@ -93,13 +101,9 @@ public class ItemController : MonoBehaviour {
 		if (activeTooltip == null) {
 			activeTooltip = Instantiate (tooltip, tooltipPos, Quaternion.identity);
 
-			// Convert from world position to canvas position
-            // (Not necessary after switching to Overlay canvas mode)
-			//RectTransform CanvasRect = activeTooltip.GetComponent<RectTransform> ();
-			//Vector3 pos = transform.position;
-			//Vector2 viewportPoint = Camera.main.WorldToViewportPoint (pos);
-			//CanvasRect.anchorMin = viewportPoint;
-			//CanvasRect.anchorMax = viewportPoint;
+            // Set tooltip text
+            Text tooltipTextField = activeTooltip.GetComponentInChildren<Text>();
+            tooltipTextField.text = _tooltipText();
 
 			activeTooltip.SetParent (canv.transform, false);
 		}
@@ -116,6 +120,11 @@ public class ItemController : MonoBehaviour {
     void OnDestroy()
     {
         Destroy(activeTooltip.gameObject);
+    }
+
+    private string _tooltipText()
+    {
+        return this.name + "\n" + quality + "\n" + "Lethality: " + Mathf.Round(lethality).ToString() + "\n" + "Efficiency: " + Mathf.Round(efficiency).ToString();
     }
 }
 
