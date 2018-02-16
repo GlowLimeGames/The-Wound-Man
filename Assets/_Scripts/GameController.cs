@@ -42,6 +42,11 @@ public class GameController : MonoBehaviour {
             // Death scroll starts inactive
             deathScroll.SetActive(true);
         }
+
+        if (Input.GetKey("escape"))
+        {
+            Application.Quit();
+        }
 	}
 
     private string _randomDeathText()
