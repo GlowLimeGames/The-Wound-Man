@@ -14,6 +14,8 @@ public class ItemController : MonoBehaviour {
         Heavy,
         Narrow,
     };
+
+    // TODO: This might change to a List<Quality>
     public Quality quality;
 
     // Tooltip prefab
@@ -22,34 +24,51 @@ public class ItemController : MonoBehaviour {
 
     private Camera _cam;
     private GameController _gm;
+    private PlayerController _pc;
 
-	private Transform activeTooltip;
+	private Transform _activeTooltip;
     private bool _onMouse;
-    private bool _inBody;
-    
 
-    private Vector3 originalPos;
-    private Vector3 originalLocalPos;
+    private Vector3 _originalPos;
+    private Vector3 _originalLocalPos;
 
-    private static Vector3 tooltipPos = new Vector3(0, 300, 0);
+    private static Vector3 _tooltipPos = new Vector3(0, 250, 0);
 
     public void TakeFromBody()
     {
         _onMouse = true;
-        _inBody = false;
+
         _gm.itemOnMouse = this;
 
         _gm.animusBurnRate += lethality;
+
+        // Allow this to show up in death messages
+        _pc.usedInventory.Add(this);
+
+        // Disable this collider, so you can have it on the mouse but still click things
+        GetComponent<BoxCollider2D>().enabled = false;
+
+        // Enable the player collider, so it can be clicked to return it to the body
+        _pc.GetComponent<BoxCollider2D>().enabled = true;
     }
 
     public void ReturnToBody()
     {
-        transform.position = originalPos;
-        transform.localPosition = originalLocalPos;
         _onMouse = false;
-        _inBody = true;
+
+        // Put it back where it was
+        // TODO: Might be more fun just to put it where clicked, so you can rearrange your inventory
+        transform.position = _originalPos;
+        transform.localPosition = _originalLocalPos;
+
+        // Enable its collider again so it can be clicked
+        GetComponent<BoxCollider2D>().enabled = true;
+
+        // Disable player collider, to allow items to be clicked instead
+        _pc.GetComponent<BoxCollider2D>().enabled = false;
+
         _gm.itemOnMouse = null;
-        Destroy(activeTooltip.gameObject);
+        Destroy(_activeTooltip.gameObject);
 
         _gm.animusBurnRate -= lethality;
     }
@@ -57,16 +76,14 @@ public class ItemController : MonoBehaviour {
 	// Use this for initialization
 	void Start () {
         _onMouse = false;
-        _inBody = true;
-        print(transform.localPosition);
-        print(transform.position);
-        originalPos = transform.position;
-        originalLocalPos = transform.localPosition;
+        _originalPos = transform.position;
+        _originalLocalPos = transform.localPosition;
 
         lethality = Random.value * 10.0f;
         efficiency = Random.value * 10.0f;
 
         _gm = GameObject.Find("GameController").GetComponent<GameController>();
+        _pc = GetComponentInParent<PlayerController>();
         _cam = Camera.main;
 
     }
@@ -78,7 +95,7 @@ public class ItemController : MonoBehaviour {
             // Item moves with the cursor
             Vector3 mousePos = _cam.ScreenToWorldPoint(Input.mousePosition);
             mousePos.z = 0.0f;                // Otherwise it gets set to -10 for some reason, and becomes invisible
-            mousePos.y = mousePos.y + 1.0f;   // Item moves slightly above the cursor
+            //mousePos.y = mousePos.y + 1.0f;   // Item moves slightly above the cursor
             transform.position = mousePos;
         }
 	}
@@ -89,23 +106,23 @@ public class ItemController : MonoBehaviour {
         {
             TakeFromBody();
 
-        } else
-        {
-            _onMouse = false;
-            _gm.itemOnMouse = null;
-        }
+        } //else
+        //{
+        //    _onMouse = false;
+        //    _gm.itemOnMouse = null;
+        //}
     }
 
-	void OnMouseOver() {
+	void OnMouseEnter() {
 
-		if (activeTooltip == null) {
-			activeTooltip = Instantiate (tooltip, tooltipPos, Quaternion.identity);
+		if (_activeTooltip == null) {
+			_activeTooltip = Instantiate (tooltip, _tooltipPos, Quaternion.identity);
 
             // Set tooltip text
-            Text tooltipTextField = activeTooltip.GetComponentInChildren<Text>();
+            Text tooltipTextField = _activeTooltip.GetComponentInChildren<Text>();
             tooltipTextField.text = _tooltipText();
 
-			activeTooltip.SetParent (canv.transform, false);
+			_activeTooltip.SetParent (canv.transform, false);
 		}
 
 	}
@@ -113,13 +130,16 @@ public class ItemController : MonoBehaviour {
 	void OnMouseExit() {
         if (!_onMouse)
         {
-            Destroy(activeTooltip.gameObject);
+            Destroy(_activeTooltip.gameObject);
         }
     }
 
     void OnDestroy()
     {
-        Destroy(activeTooltip.gameObject);
+        if (_activeTooltip != null)
+        {
+            Destroy(_activeTooltip.gameObject);
+        }
     }
 
     private string _tooltipText()
@@ -127,7 +147,3 @@ public class ItemController : MonoBehaviour {
         return this.name + "\n" + quality + "\n" + "Lethality: " + Mathf.Round(lethality).ToString() + "\n" + "Efficiency: " + Mathf.Round(efficiency).ToString();
     }
 }
-
-// When I click on the target, check if the right object is "on the mouse"
-// (But currently if I click on anything, it clicks on the on-mouse object...)
-// For now I'll just make the item track above the mouse
