@@ -30,21 +30,13 @@ public class TargetController : MonoBehaviour {
     {
         if (_gm.itemOnMouse.quality == requiredQuality)
         {
-            Destroy(_gm.itemOnMouse.gameObject);
+
+			_gm.itemOnMouse.ReturnToBody ();
             
             Destroy(this.gameObject);
-
-            _gm.itemOnMouse = null;
         }
     }
-
-    //void OnTriggerEnter2D(Collider2D other)
-    //{
-    //    // Player items should have a boxcollider2D and a rigidbody2D set to d ynamic, with a gravity scale 0.
-    //    // That's one way to get the triggers to happen
-    //    print(other);
-    //}
-
+		
     void OnMouseEnter()
     {
 

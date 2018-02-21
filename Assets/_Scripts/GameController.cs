@@ -5,6 +5,7 @@ using UnityEngine.UI;
 
 public class GameController : MonoBehaviour {
 
+	public PlayerController player;
     public ItemController itemOnMouse;
     public float animus;
     public Text animusText;
@@ -59,7 +60,12 @@ public class GameController : MonoBehaviour {
 
     private string _randomUsedItemName()
     {
-        // TODO: Yep, so random
-        return "sword";
+        // TODO: Make sure at least one item has been used to avoid infinite loop
+
+		int index = Random.Range(0, player.inventory.Count);
+		while (!player.inventory [index].used) {
+			index = Random.Range (0, player.inventory.Count);
+		}
+		return player.inventory [index].name;
     }
 }

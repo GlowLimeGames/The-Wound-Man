@@ -18,6 +18,8 @@ public class ItemController : MonoBehaviour {
     // TODO: This might change to a List<Quality>
     public Quality quality;
 
+	public bool used;
+
     // Tooltip prefab
     public Transform tooltip;
     public Canvas canv;
@@ -43,7 +45,8 @@ public class ItemController : MonoBehaviour {
         _gm.animusBurnRate += lethality;
 
         // Allow this to show up in death messages
-        _pc.usedInventory.Add(this);
+		this.used = true;
+        //_pc.usedInventory.Add(this);
 
         // Disable this collider, so you can have it on the mouse but still click things
         GetComponent<BoxCollider2D>().enabled = false;
@@ -58,6 +61,7 @@ public class ItemController : MonoBehaviour {
 
         // Put it back where it was
         // TODO: Might be more fun just to put it where clicked, so you can rearrange your inventory
+		// (But would still use originalposition as a fallback, since it gets returned after solving a puzzle)
         transform.position = _originalPos;
         transform.localPosition = _originalLocalPos;
 
@@ -78,6 +82,8 @@ public class ItemController : MonoBehaviour {
         _onMouse = false;
         _originalPos = transform.position;
         _originalLocalPos = transform.localPosition;
+
+		used = false;
 
         lethality = Random.value * 10.0f;
         efficiency = Random.value * 10.0f;
@@ -144,6 +150,7 @@ public class ItemController : MonoBehaviour {
 
     private string _tooltipText()
     {
+		// TODO: Any good way to style different parts of the text?
         return this.name + "\n" + quality + "\n" + "Lethality: " + Mathf.Round(lethality).ToString() + "\n" + "Efficiency: " + Mathf.Round(efficiency).ToString();
     }
 }
