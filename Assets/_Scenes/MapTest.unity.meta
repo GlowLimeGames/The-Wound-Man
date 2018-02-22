@@ -1,9 +1,22 @@
 fileFormatVersion: 2
+<<<<<<< HEAD
 guid: b18e8091124e14027b85efba9afdeb9c
 timeCreated: 1519270488
 licenseType: Free
 DefaultImporter:
   externalObjects: {}
+=======
+<<<<<<< HEAD:Assets/_Scenes/MapTest.unity.meta
+guid: b18e8091124e14027b85efba9afdeb9c
+timeCreated: 1519175814
+=======
+guid: 0d16b7c8d57a247f3b56066dfb1eaf3c
+folderAsset: yes
+timeCreated: 1519177017
+>>>>>>> master:Assets/_Scripts.meta
+licenseType: Free
+DefaultImporter:
+>>>>>>> d65e799ce9d1cfc4182516299662d3807b72501d
   userData: 
   assetBundleName: 
   assetBundleVariant: 
