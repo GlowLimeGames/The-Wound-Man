@@ -6,7 +6,9 @@ public class Map : MonoBehaviour {
 
 	public Room activeRoom;
 
-	private Camera _cam;
+    private static Vector3 playerOffset = new Vector3(-6.9f, -2.87f, 0.0f);
+
+    private Camera _cam;
 
 	// Make this a singleton. Can access it from objects with Map.Instance
 	public static Map Instance
@@ -30,6 +32,8 @@ public class Map : MonoBehaviour {
 	}
 
 	public void ChangeRoom (Room room) {
+        PlayerController.Instance.transform.position = room.transform.position + playerOffset;
+
 		Vector3 camDest = room.transform.position;
 		camDest.z = -10.0f;
 		_cam.transform.position = camDest;

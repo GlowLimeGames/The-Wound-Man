@@ -10,7 +10,6 @@ public class TargetController : MonoBehaviour {
     public Transform tooltip;
     public Canvas canv;
 
-    private GameController _gm;
     private Transform _activeTooltip;
 
     // In the middle of the screen, but below the item tooltip
@@ -18,7 +17,7 @@ public class TargetController : MonoBehaviour {
 
     // Use this for initialization
     void Start () {
-        _gm = GameObject.Find("GameController").GetComponent<GameController>();
+
     }
 	
 	// Update is called once per frame
@@ -28,10 +27,10 @@ public class TargetController : MonoBehaviour {
 
     void OnMouseDown()
     {
-        if (_gm.itemOnMouse.quality == requiredQuality)
+        if (GameController.Instance.itemOnMouse.quality == requiredQuality)
         {
 
-			_gm.itemOnMouse.ReturnToBody ();
+			GameController.Instance.itemOnMouse.ReturnToBody ();
             
             Destroy(this.gameObject);
         }

@@ -25,8 +25,6 @@ public class ItemController : MonoBehaviour {
     public Canvas canv;
 
     private Camera _cam;
-    private GameController _gm;
-    private PlayerController _pc;
 
 	private Transform _activeTooltip;
     private bool _onMouse;
@@ -40,9 +38,9 @@ public class ItemController : MonoBehaviour {
     {
         _onMouse = true;
 
-        _gm.itemOnMouse = this;
+        GameController.Instance.itemOnMouse = this;
 
-        _gm.animusBurnRate += lethality;
+        GameController.Instance.animusBurnRate += lethality;
 
         // Allow this to show up in death messages
 		this.used = true;
@@ -52,7 +50,7 @@ public class ItemController : MonoBehaviour {
         GetComponent<BoxCollider2D>().enabled = false;
 
         // Enable the player collider, so it can be clicked to return it to the body
-        _pc.GetComponent<BoxCollider2D>().enabled = true;
+        PlayerController.Instance.GetComponent<BoxCollider2D>().enabled = true;
     }
 
     public void ReturnToBody()
@@ -69,12 +67,12 @@ public class ItemController : MonoBehaviour {
         GetComponent<BoxCollider2D>().enabled = true;
 
         // Disable player collider, to allow items to be clicked instead
-        _pc.GetComponent<BoxCollider2D>().enabled = false;
+        PlayerController.Instance.GetComponent<BoxCollider2D>().enabled = false;
 
-        _gm.itemOnMouse = null;
+        GameController.Instance.itemOnMouse = null;
         Destroy(_activeTooltip.gameObject);
 
-        _gm.animusBurnRate -= lethality;
+        GameController.Instance.animusBurnRate -= lethality;
     }
 
 	// Use this for initialization
@@ -88,8 +86,6 @@ public class ItemController : MonoBehaviour {
         lethality = Random.value * 10.0f;
         efficiency = Random.value * 10.0f;
 
-        _gm = GameObject.Find("GameController").GetComponent<GameController>();
-        _pc = GetComponentInParent<PlayerController>();
         _cam = Camera.main;
 
     }
@@ -112,11 +108,7 @@ public class ItemController : MonoBehaviour {
         {
             TakeFromBody();
 
-        } //else
-        //{
-        //    _onMouse = false;
-        //    _gm.itemOnMouse = null;
-        //}
+        }
     }
 
 	void OnMouseEnter() {

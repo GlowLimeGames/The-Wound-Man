@@ -17,8 +17,29 @@ public class GameController : MonoBehaviour {
 
     private float _animusOfLastDeathNotification;
 
-	// Use this for initialization
-	void Start () {
+    // Singleton. Can access as GameController.Instance
+    public static GameController Instance
+    {
+        get
+        {
+            return instance;
+        }
+    }
+    private static GameController instance = null;
+
+    void Awake()
+    {
+        if (instance)
+        {
+            DestroyImmediate(gameObject);
+            return;
+        }
+        instance = this;
+        //DontDestroyOnLoad(gameObject);
+    }
+
+    // Use this for initialization
+    void Start () {
         animus = 100.0f;
         animusBurnRate = 0.0f;
         _animusOfLastDeathNotification = 100.0f;

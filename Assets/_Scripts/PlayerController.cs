@@ -8,8 +8,29 @@ public class PlayerController : MonoBehaviour {
 
     private GameController _gm;
 
-	// Use this for initialization
-	void Start () {
+    // Make it a singleton. Can access as PlayerController.Instance anywhere
+    public static PlayerController Instance
+    {
+        get
+        {
+            return instance;
+        }
+    }
+    private static PlayerController instance = null;
+
+    void Awake()
+    {
+        if (instance)
+        {
+            DestroyImmediate(gameObject);
+            return;
+        }
+        instance = this;
+        //DontDestroyOnLoad(gameObject);
+    }
+
+    // Use this for initialization
+    void Start () {
         // When using a list instead of an array, you put it as the first argument 
 		// intead of doing an assignment statement.
         GetComponentsInChildren<ItemController>(inventory);
