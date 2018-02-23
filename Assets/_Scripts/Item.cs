@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.UI;
 
-public class ItemController : MonoBehaviour {
+public class Item : MonoBehaviour {
 
     public float lethality;
     public float efficiency;
@@ -23,8 +23,6 @@ public class ItemController : MonoBehaviour {
     // Tooltip prefab
     public Transform tooltip;
     public Canvas canv;
-
-    private Camera _cam;
 
 	private Transform _activeTooltip;
     private bool _onMouse;
@@ -50,7 +48,7 @@ public class ItemController : MonoBehaviour {
         GetComponent<BoxCollider2D>().enabled = false;
 
         // Enable the player collider, so it can be clicked to return it to the body
-        PlayerController.Instance.GetComponent<BoxCollider2D>().enabled = true;
+        WoundMan.Instance.GetComponent<BoxCollider2D>().enabled = true;
     }
 
     public void ReturnToBody()
@@ -67,7 +65,7 @@ public class ItemController : MonoBehaviour {
         GetComponent<BoxCollider2D>().enabled = true;
 
         // Disable player collider, to allow items to be clicked instead
-        PlayerController.Instance.GetComponent<BoxCollider2D>().enabled = false;
+        WoundMan.Instance.GetComponent<BoxCollider2D>().enabled = false;
 
         GameController.Instance.itemOnMouse = null;
         Destroy(_activeTooltip.gameObject);
@@ -86,8 +84,6 @@ public class ItemController : MonoBehaviour {
         lethality = Random.value * 10.0f;
         efficiency = Random.value * 10.0f;
 
-        _cam = Camera.main;
-
     }
 	
 	// Update is called once per frame
@@ -95,7 +91,7 @@ public class ItemController : MonoBehaviour {
 		if (_onMouse)
         {
             // Item moves with the cursor
-            Vector3 mousePos = _cam.ScreenToWorldPoint(Input.mousePosition);
+            Vector3 mousePos = Camera.main.ScreenToWorldPoint(Input.mousePosition);
             mousePos.z = 0.0f;                // Otherwise it gets set to -10 for some reason, and becomes invisible
             //mousePos.y = mousePos.y + 1.0f;   // Item moves slightly above the cursor
             transform.position = mousePos;

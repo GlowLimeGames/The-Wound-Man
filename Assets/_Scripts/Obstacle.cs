@@ -3,9 +3,11 @@ using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.UI;
 
-public class TargetController : MonoBehaviour {
+public class Obstacle : MonoBehaviour {
 
-    public ItemController.Quality requiredQuality;
+    public GameObject objectGuarded;
+
+    public Item.Quality requiredQuality;
 
     public Transform tooltip;
     public Canvas canv;
@@ -17,7 +19,8 @@ public class TargetController : MonoBehaviour {
 
     // Use this for initialization
     void Start () {
-
+        // Disable clicking on the object underneath
+        objectGuarded.GetComponent<BoxCollider2D>().enabled = false;
     }
 	
 	// Update is called once per frame
@@ -27,13 +30,22 @@ public class TargetController : MonoBehaviour {
 
     void OnMouseDown()
     {
-        if (GameController.Instance.itemOnMouse.quality == requiredQuality)
+        if (GameController.Instance.itemOnMouse != null)
         {
+            if (GameController.Instance.itemOnMouse.quality == requiredQuality)
+            {
+                // Enable clicking on the guarded object
+                if (objectGuarded != null)
+                {
+                    objectGuarded.GetComponent<BoxCollider2D>().enabled = true;
+                }
 
-			GameController.Instance.itemOnMouse.ReturnToBody ();
-            
-            Destroy(this.gameObject);
+                //GameController.Instance.itemOnMouse.ReturnToBody();
+
+                Destroy(this.gameObject);
+            }
         }
+
     }
 		
     void OnMouseEnter()

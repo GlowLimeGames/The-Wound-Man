@@ -2,21 +2,20 @@
 using System.Collections.Generic;
 using UnityEngine;
 
-public class PlayerController : MonoBehaviour {
+public class WoundMan : MonoBehaviour {
+    // WoundMan is the player avatar object.
 
-    public List<ItemController> inventory;
+    public List<Item> inventory;
 
-    private GameController _gm;
-
-    // Make it a singleton. Can access as PlayerController.Instance anywhere
-    public static PlayerController Instance
+    // Make it a singleton. Can access as WoundMan.Instance anywhere
+    public static WoundMan Instance
     {
         get
         {
             return instance;
         }
     }
-    private static PlayerController instance = null;
+    private static WoundMan instance = null;
 
     void Awake()
     {
@@ -26,29 +25,30 @@ public class PlayerController : MonoBehaviour {
             return;
         }
         instance = this;
-        //DontDestroyOnLoad(gameObject);
+
     }
 
     // Use this for initialization
     void Start () {
         // When using a list instead of an array, you put it as the first argument 
 		// intead of doing an assignment statement.
-        GetComponentsInChildren<ItemController>(inventory);
+        GetComponentsInChildren<Item>(inventory);
 
-        _gm = GameObject.Find("GameController").GetComponent<GameController>();
+        // BoxCollider2D should be disabled by default. (This is redundant)
+        this.GetComponent<BoxCollider2D>().enabled = false;
 	}
 	
 	// Update is called once per frame
 	void Update () {
-        // TODO: Movement disabled for now, looking like we won't be moving this way
+
 	}
 
     // Clicking on the player while holding an item returns it to the body
     void OnMouseDown()
     {
-        if (_gm.itemOnMouse != null)
+        if (GameController.Instance.itemOnMouse != null)
         {
-            _gm.itemOnMouse.ReturnToBody();
+            GameController.Instance.itemOnMouse.ReturnToBody();
         }
     }
 }
