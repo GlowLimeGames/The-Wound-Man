@@ -5,7 +5,12 @@ using UnityEngine.UI;
 
 public class Obstacle : MonoBehaviour {
 
+	public float endurance;
     public GameObject objectGuarded;
+
+	// TODO: Currently this is just an object existing in the scene, a child of Canvas.
+	// Not sure which is less annoying: this, or instantiating a prefab in Start()...
+	public Slider enduranceSlider;
 
     public Item.Quality requiredQuality;
 
@@ -17,35 +22,61 @@ public class Obstacle : MonoBehaviour {
     // In the middle of the screen, but below the item tooltip
     private static Vector3 _tooltipPos = new Vector3(0, 100, 0);
 
+	private static Vector3 _enduranceSliderOffset = new Vector3 (0, 100, 0);
+
     // Use this for initialization
     void Start () {
         // Disable clicking on the object underneath
         objectGuarded.GetComponent<BoxCollider2D>().enabled = false;
+
+		// Set enduranceSlider to be above the object
+		Vector3 p = Camera.main.WorldToScreenPoint (transform.position);
+		p += _enduranceSliderOffset;
+
+		enduranceSlider.transform.position = p;
+
+		// Initialize slider values
+		enduranceSlider.maxValue = endurance;
+		enduranceSlider.value = endurance;
+
+		enduranceSlider.gameObject.SetActive (false);
+
     }
 	
 	// Update is called once per frame
 	void Update () {
-		
+		if (endurance <= 0.0) {
+			// Enable clicking on the guarded object
+			if (objectGuarded != null) {
+				objectGuarded.GetComponent<BoxCollider2D> ().enabled = true;
+			}
+
+			//Destroy (enduranceSlider.gameObject);
+			GameController.Instance.itemOnMouse.DoneUsing();
+			Destroy (this.gameObject);
+		}
 	}
 
-    void OnMouseDown()
+    void OnMouseOver()
     {
-        if (GameController.Instance.itemOnMouse != null)
-        {
-            if (GameController.Instance.itemOnMouse.quality == requiredQuality)
-            {
-                // Enable clicking on the guarded object
-                if (objectGuarded != null)
-                {
-                    objectGuarded.GetComponent<BoxCollider2D>().enabled = true;
-                }
+		if (Input.GetMouseButton (0)) {
+			if (GameController.Instance.itemOnMouse != null) {
+				if (GameController.Instance.itemOnMouse.quality == requiredQuality) {
+					if (!enduranceSlider.IsActive ()) {
+						enduranceSlider.gameObject.SetActive (true);
+						GameController.Instance.itemOnMouse.Use ();
+					}
 
-                //GameController.Instance.itemOnMouse.ReturnToBody();
-
-                Destroy(this.gameObject);
-            }
-        }
-
+					endurance -= GameController.Instance.itemOnMouse.efficiency * Time.deltaTime;
+					enduranceSlider.value = endurance;
+				}
+			}
+		} else {
+			// If mouse isn't down, pause the animus
+			if (GameController.Instance.itemOnMouse != null) {
+				GameController.Instance.itemOnMouse.DoneUsing ();
+			}
+		}
     }
 		
     void OnMouseEnter()
@@ -75,6 +106,7 @@ public class Obstacle : MonoBehaviour {
         {
             Destroy(_activeTooltip.gameObject);
         }
+		Destroy (enduranceSlider.gameObject);
     }
 
     private string _tooltipText()

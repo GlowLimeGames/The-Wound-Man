@@ -32,13 +32,27 @@ public class Item : MonoBehaviour {
 
     private static Vector3 _tooltipPos = new Vector3(0, 250, 0);
 
+	public void Use()
+	{
+		// Deal animus damage.
+		// TODO: Is it a random chance to get decreased by lethality, or does it always decrease? 
+		// Going with constant decrease for now
+		//print("Set burn rate");
+		GameController.Instance.animusBurnRate = lethality;
+	}
+
+	public void DoneUsing()
+	{
+		GameController.Instance.animusBurnRate = 0.0f;
+	}
+
     public void TakeFromBody()
     {
         _onMouse = true;
 
         GameController.Instance.itemOnMouse = this;
 
-        GameController.Instance.animusBurnRate += lethality;
+        //GameController.Instance.animusBurnRate += lethality;
 
         // Allow this to show up in death messages
 		this.used = true;
@@ -70,7 +84,7 @@ public class Item : MonoBehaviour {
         GameController.Instance.itemOnMouse = null;
         Destroy(_activeTooltip.gameObject);
 
-        GameController.Instance.animusBurnRate -= lethality;
+        //GameController.Instance.animusBurnRate -= lethality;
     }
 
 	// Use this for initialization
