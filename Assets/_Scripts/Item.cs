@@ -29,6 +29,7 @@ public class Item : MonoBehaviour {
 	private Transform _activeTooltip;
     private bool _onMouse;
 	private bool _removing;
+	private bool _inserting;
 	private Vector3 _mouseOffset;
 
     private Vector3 _originalPos;
@@ -81,13 +82,15 @@ public class Item : MonoBehaviour {
 		// TODO: redundant?
 		_removing = false;
 
-		_embeddedPart.transform.localPosition = _embeddedPartOriginalPosition;
+		_inserting = true;
+
+		//_embeddedPart.transform.localPosition = _embeddedPartOriginalPosition;
 
         // Put it back where it was
         // TODO: Might be more fun just to put it where clicked, so you can rearrange your inventory
 		// (But would still use originalposition as a fallback, since it gets returned after solving a puzzle)
-        transform.position = _originalPos;
-        transform.localPosition = _originalLocalPos;
+        //transform.position = _originalPos;
+        //transform.localPosition = _originalLocalPos;
 
         // Enable its collider again so it can be clicked
         GetComponent<BoxCollider2D>().enabled = true;
@@ -95,8 +98,8 @@ public class Item : MonoBehaviour {
         // Disable player collider, to allow items to be clicked instead
         WoundMan.Instance.GetComponent<BoxCollider2D>().enabled = false;
 
-        GameController.Instance.itemOnMouse = null;
-        Destroy(_activeTooltip.gameObject);
+        //GameController.Instance.itemOnMouse = null;
+        //Destroy(_activeTooltip.gameObject);
 
         //GameController.Instance.animusBurnRate -= lethality;
     }
@@ -120,24 +123,12 @@ public class Item : MonoBehaviour {
 	// Update is called once per frame
 	void Update () {
 		if (_removing) {
-			// Calculate the angle difference between the item's insertion axis and mouse movement
-			Vector3 mousePos = Camera.main.ScreenToWorldPoint(Input.mousePosition);
-
-			float h = Input.GetAxis("Mouse X");
-			float v = Input.GetAxis("Mouse Y");
-			float angleToUp = Vector3.Angle (Vector3.up, new Vector3(h, v));
-
-			float angleDiff;
-			if (transform.rotation.eulerAngles.z < 180) {
-				angleDiff = angleToUp - transform.rotation.eulerAngles.z;
-			} else {
-				angleDiff = angleToUp - (360.0f - transform.rotation.eulerAngles.z);
-			}
-				
 			// If the angle's close enough, slide it out for one frame
 			// TODO: Should you also be able to slide it back in?
-			if (Mathf.Abs (angleDiff) < 10.0f) {
+			float ang = _angleToMouse();
+			if (ang < 10.0f) {
 				// Don't set the position directly, that might teleport it outside of the body
+				Vector3 mousePos = Camera.main.ScreenToWorldPoint(Input.mousePosition);
 				Vector3 mouseDelta = mousePos - lastMousePos;
 				transform.position += mouseDelta;
 
@@ -146,10 +137,7 @@ public class Item : MonoBehaviour {
 
 				// If it's all the way out of the body, put it on the mouse
 				if (!_embeddedPart.bounds.Intersects (GetComponent<SpriteRenderer> ().bounds)) {
-					_removing = false;
-					_onMouse = true;
-
-					// TODO: Add a blood particle effect, or something to make it obvious
+					_FullyRemoveFromBody ();
 				}
 			}
 		}
@@ -159,11 +147,28 @@ public class Item : MonoBehaviour {
             // Item moves with the cursor
             Vector3 mousePos = Camera.main.ScreenToWorldPoint(Input.mousePosition);
 			mousePos += _mouseOffset;
-            mousePos.z = 0.0f;                // Otherwise it gets set to -10 for some reason, and becomes invisible
-            //mousePos.y = mousePos.y + 1.0f;   // Item moves slightly above the cursor
+            mousePos.z = 0.0f;                // Otherwise it gets set to -10, and becomes invisible
 
             transform.position = mousePos;
         }
+
+		// TODO: Not working yet
+		if (_inserting) {
+			print (_angleToMouse (reverse: true));
+			if (_angleToMouse (reverse: true) < 10.0f) {
+				Vector3 mousePos = Camera.main.ScreenToWorldPoint (Input.mousePosition);
+				Vector3 mouseDelta = mousePos - lastMousePos;
+				transform.position += mouseDelta;
+
+				_embeddedPart.transform.position += (mouseDelta);
+
+				// TODO: I need another box or something to show how far it needs to be inserted.
+
+				// TODO: Use positive masks instead of negative ones to avoid masking other items.
+
+			}
+		}
+
 		lastMousePos = Camera.main.ScreenToWorldPoint (Input.mousePosition);
 	}
 
@@ -204,6 +209,33 @@ public class Item : MonoBehaviour {
             Destroy(_activeTooltip.gameObject);
         }
     }
+
+	private void _FullyRemoveFromBody() {
+		_removing = false;
+		_onMouse = true;
+		// TODO: Add a blood particle effect, or something to make it obvious
+	}
+
+	private void _FullyInsertIntoBody() {
+		_inserting = false;
+	}
+
+	private float _angleToMouse(bool reverse=false) {
+		float h = Input.GetAxis("Mouse X");
+		float v = Input.GetAxis("Mouse Y");
+		float angleToUp = Vector3.Angle (Vector3.up, new Vector3(h, v));
+
+		float angleDiff;
+		float zAngle = transform.eulerAngles.z;
+
+		if (zAngle < 180) {
+			angleDiff = angleToUp - transform.rotation.eulerAngles.z;
+		} else {
+			angleDiff = angleToUp - (360.0f - transform.rotation.eulerAngles.z);
+		}
+
+		return Mathf.Abs(angleDiff);
+	}
 
     private string _tooltipText()
     {
