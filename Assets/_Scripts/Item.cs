@@ -135,6 +135,11 @@ public class Item : MonoBehaviour {
 				// Slide spritemask that far away
 				_embeddedPart.transform.position += (mouseDelta * -1.0f);
 
+                //if (!_embeddedPart.GetComponent<BoxCollider2D>().IsTouching(this.GetComponent<BoxCollider2D>()))
+                //{
+                //    _FullyRemoveFromBody();
+                //}
+
 				// If it's all the way out of the body, put it on the mouse
 				if (!_embeddedPart.bounds.Intersects (GetComponent<SpriteRenderer> ().bounds)) {
 					_FullyRemoveFromBody ();
@@ -152,19 +157,21 @@ public class Item : MonoBehaviour {
             transform.position = mousePos;
         }
 
-		// TODO: Not working yet
 		if (_inserting) {
-			print (_angleToMouse (reverse: true));
 			if (_angleToMouse (reverse: true) < 10.0f) {
 				Vector3 mousePos = Camera.main.ScreenToWorldPoint (Input.mousePosition);
 				Vector3 mouseDelta = mousePos - lastMousePos;
 				transform.position += mouseDelta;
 
-				_embeddedPart.transform.position += (mouseDelta);
+                // Still want the masking box to move opposite of mouseDelta.
+				_embeddedPart.transform.position += (mouseDelta * -1.0f);
 
-				// TODO: I need another box or something to show how far it needs to be inserted.
+                float dist = _embeddedPart.GetComponent<BoxCollider2D>().Distance(this.GetComponent<BoxCollider2D>()).distance;
 
-				// TODO: Use positive masks instead of negative ones to avoid masking other items.
+                if (dist <= 0.0f)
+                {
+                    _FullyInsertIntoBody();
+                }
 
 			}
 		}
@@ -223,15 +230,21 @@ public class Item : MonoBehaviour {
 	private float _angleToMouse(bool reverse=false) {
 		float h = Input.GetAxis("Mouse X");
 		float v = Input.GetAxis("Mouse Y");
-		float angleToUp = Vector3.Angle (Vector3.up, new Vector3(h, v));
+		float mouseAngle = Vector3.Angle (Vector3.up, new Vector3(h, v));
 
 		float angleDiff;
 		float zAngle = transform.eulerAngles.z;
 
+        if (reverse)
+        {
+            zAngle = zAngle - 180.0f;
+        }
+
 		if (zAngle < 180) {
-			angleDiff = angleToUp - transform.rotation.eulerAngles.z;
+			angleDiff = mouseAngle - zAngle;
 		} else {
-			angleDiff = angleToUp - (360.0f - transform.rotation.eulerAngles.z);
+            angleDiff = mouseAngle - (360.0f - zAngle);
+            //angleDiff = mouseAngle - transform.rotation.eulerAngles.z - 180.0f;
 		}
 
 		return Mathf.Abs(angleDiff);
