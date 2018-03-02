@@ -24,6 +24,8 @@ public class Item : MonoBehaviour {
     public Transform tooltip;
     public Canvas canv;
 
+    public float embeddedPartLength;
+
 	private Vector3 lastMousePos;
 
 	private Transform _activeTooltip;
@@ -84,14 +86,6 @@ public class Item : MonoBehaviour {
 
 		_inserting = true;
 
-		//_embeddedPart.transform.localPosition = _embeddedPartOriginalPosition;
-
-        // Put it back where it was
-        // TODO: Might be more fun just to put it where clicked, so you can rearrange your inventory
-		// (But would still use originalposition as a fallback, since it gets returned after solving a puzzle)
-        //transform.position = _originalPos;
-        //transform.localPosition = _originalLocalPos;
-
         // Enable its collider again so it can be clicked
         GetComponent<BoxCollider2D>().enabled = true;
 
@@ -115,8 +109,9 @@ public class Item : MonoBehaviour {
 
 		used = false;
 
-        lethality = Random.value * 10.0f;
-        efficiency = Random.value * 10.0f;
+        // Floats between 1 and 10
+        lethality = (Random.value * 9.0f) + 1.0f;
+        efficiency = (Random.value * 9.0f) + 1.0f;
 
     }
 	
@@ -133,17 +128,21 @@ public class Item : MonoBehaviour {
 				transform.position += mouseDelta;
 
 				// Slide spritemask that far away
+                // TODO: To avoid the kinda rough "diagonal sliding" thing happening, it might be
+                //       better to slide it only along the correct removal axis, not with the full mouseDelta
 				_embeddedPart.transform.position += (mouseDelta * -1.0f);
 
-                //if (!_embeddedPart.GetComponent<BoxCollider2D>().IsTouching(this.GetComponent<BoxCollider2D>()))
-                //{
-                //    _FullyRemoveFromBody();
+                // If it's all the way out of the body, put it on the mouse
+                //if (!_embeddedPart.bounds.Intersects (GetComponent<SpriteRenderer> ().bounds)) {
+                //	_FullyRemoveFromBody ();
                 //}
 
-				// If it's all the way out of the body, put it on the mouse
-				if (!_embeddedPart.bounds.Intersects (GetComponent<SpriteRenderer> ().bounds)) {
-					_FullyRemoveFromBody ();
-				}
+                if ((-1)*_embeddedPart.transform.localPosition.y > embeddedPartLength)
+                {
+                    _FullyRemoveFromBody();
+                }
+
+                
 			}
 		}
 
@@ -158,22 +157,21 @@ public class Item : MonoBehaviour {
         }
 
 		if (_inserting) {
-			if (_angleToMouse (reverse: true) < 10.0f) {
-				Vector3 mousePos = Camera.main.ScreenToWorldPoint (Input.mousePosition);
+            // TODO: Still happening instantly for the hammer. Not sure why
+            if (_angleToMouse (reverse: true) < 10.0f) {
+                Vector3 mousePos = Camera.main.ScreenToWorldPoint (Input.mousePosition);
 				Vector3 mouseDelta = mousePos - lastMousePos;
 				transform.position += mouseDelta;
 
                 // Still want the masking box to move opposite of mouseDelta.
 				_embeddedPart.transform.position += (mouseDelta * -1.0f);
 
-                float dist = _embeddedPart.GetComponent<BoxCollider2D>().Distance(this.GetComponent<BoxCollider2D>()).distance;
-
-                if (dist <= 0.0f)
+                if ((_embeddedPart.transform.localPosition.y) > _embeddedPartOriginalPosition.y)
                 {
                     _FullyInsertIntoBody();
                 }
 
-			}
+            }
 		}
 
 		lastMousePos = Camera.main.ScreenToWorldPoint (Input.mousePosition);
@@ -225,6 +223,8 @@ public class Item : MonoBehaviour {
 
 	private void _FullyInsertIntoBody() {
 		_inserting = false;
+        //_embeddedPart.transform.localPosition = _embeddedPartOriginalPosition;
+        GameController.Instance.itemOnMouse = null;
 	}
 
 	private float _angleToMouse(bool reverse=false) {

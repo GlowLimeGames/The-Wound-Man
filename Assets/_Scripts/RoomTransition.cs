@@ -17,6 +17,7 @@ public class RoomTransition : MonoBehaviour {
 	}
 
 	void OnMouseUp() {
+        print(GameController.Instance.itemOnMouse);
         // Go to the destination room only if not holding an item
         if (GameController.Instance.itemOnMouse == null)
         {

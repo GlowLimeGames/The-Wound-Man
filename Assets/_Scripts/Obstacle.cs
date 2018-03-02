@@ -51,7 +51,6 @@ public class Obstacle : MonoBehaviour {
 				objectGuarded.GetComponent<BoxCollider2D> ().enabled = true;
 			}
 
-			//Destroy (enduranceSlider.gameObject);
 			GameController.Instance.itemOnMouse.DoneUsing();
 			Destroy (this.gameObject);
 		}
@@ -59,9 +58,12 @@ public class Obstacle : MonoBehaviour {
 
     void OnMouseOver()
     {
+        // Check if player is clicking on this obstacle with the right item
 		if (Input.GetMouseButton (0)) {
 			if (GameController.Instance.itemOnMouse != null) {
 				if (GameController.Instance.itemOnMouse.quality == requiredQuality) {
+                    
+                    // Decrease the obstacle's efficiency
 					if (!enduranceSlider.IsActive ()) {
 						enduranceSlider.gameObject.SetActive (true);
 						GameController.Instance.itemOnMouse.Use ();

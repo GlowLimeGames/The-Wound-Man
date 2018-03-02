@@ -666,61 +666,16 @@ Prefab:
       propertyPath: m_RootOrder
       value: 3
       objectReference: {fileID: 0}
-    - target: {fileID: 114980789372713104, guid: 5b026f97cce964edd93a44a76bc76346,
-        type: 2}
-      propertyPath: canv
-      value: 
-      objectReference: {fileID: 1105841912}
     - target: {fileID: 114622826712194540, guid: 5b026f97cce964edd93a44a76bc76346,
         type: 2}
       propertyPath: canv
       value: 
       objectReference: {fileID: 1105841912}
-    - target: {fileID: 331811623044921168, guid: 5b026f97cce964edd93a44a76bc76346,
+    - target: {fileID: 114980789372713104, guid: 5b026f97cce964edd93a44a76bc76346,
         type: 2}
-      propertyPath: m_IsCustomRangeActive
-      value: 1
-      objectReference: {fileID: 0}
-    - target: {fileID: 331811623044921168, guid: 5b026f97cce964edd93a44a76bc76346,
-        type: 2}
-      propertyPath: m_FrontSortingLayerID
-      value: 854461177
-      objectReference: {fileID: 0}
-    - target: {fileID: 331811623044921168, guid: 5b026f97cce964edd93a44a76bc76346,
-        type: 2}
-      propertyPath: m_FrontSortingLayer
-      value: 3
-      objectReference: {fileID: 0}
-    - target: {fileID: 61265969148542752, guid: 5b026f97cce964edd93a44a76bc76346,
-        type: 2}
-      propertyPath: m_IsTrigger
-      value: 1
-      objectReference: {fileID: 0}
-    - target: {fileID: 61383278912097212, guid: 5b026f97cce964edd93a44a76bc76346,
-        type: 2}
-      propertyPath: m_IsTrigger
-      value: 1
-      objectReference: {fileID: 0}
-    - target: {fileID: 331811623044921168, guid: 5b026f97cce964edd93a44a76bc76346,
-        type: 2}
-      propertyPath: m_BackSortingLayerID
-      value: 244852591
-      objectReference: {fileID: 0}
-    - target: {fileID: 331811623044921168, guid: 5b026f97cce964edd93a44a76bc76346,
-        type: 2}
-      propertyPath: m_BackSortingLayer
-      value: 2
-      objectReference: {fileID: 0}
-    - target: {fileID: 331921470687852344, guid: 5b026f97cce964edd93a44a76bc76346,
-        type: 2}
-      propertyPath: m_BackSortingLayerID
-      value: 1994473219
-      objectReference: {fileID: 0}
-    - target: {fileID: 331921470687852344, guid: 5b026f97cce964edd93a44a76bc76346,
-        type: 2}
-      propertyPath: m_BackSortingLayer
-      value: 1
-      objectReference: {fileID: 0}
+      propertyPath: canv
+      value: 
+      objectReference: {fileID: 1105841912}
     m_RemovedComponents: []
   m_ParentPrefab: {fileID: 100100000, guid: 5b026f97cce964edd93a44a76bc76346, type: 2}
   m_IsPrefabParent: 0
