@@ -40,9 +40,27 @@ TagManager:
   - 
   - 
   m_SortingLayers:
+  - name: Background
+    uniqueID: 357611535
+    locked: 0
   - name: Default
     uniqueID: 0
     locked: 0
-  - name: Items
+  - name: Obstacles
+    uniqueID: 1994473219
+    locked: 0
+  - name: Items-1
     uniqueID: 244852591
+    locked: 0
+  - name: Items-2
+    uniqueID: 854461177
+    locked: 0
+  - name: Items-3
+    uniqueID: 2904625437
+    locked: 0
+  - name: Items-4
+    uniqueID: 945739151
+    locked: 0
+  - name: Items-5
+    uniqueID: 1828433781
     locked: 0

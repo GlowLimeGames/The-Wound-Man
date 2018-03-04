@@ -5,8 +5,7 @@ using UnityEngine.UI;
 
 public class GameController : MonoBehaviour {
 
-	public PlayerController player;
-    public ItemController itemOnMouse;
+    public Item itemOnMouse;
     public float animus;
     public Text animusText;
     public GameObject deathScroll;
@@ -17,8 +16,29 @@ public class GameController : MonoBehaviour {
 
     private float _animusOfLastDeathNotification;
 
-	// Use this for initialization
-	void Start () {
+    // Singleton. Can access as GameController.Instance
+    public static GameController Instance
+    {
+        get
+        {
+            return instance;
+        }
+    }
+    private static GameController instance = null;
+
+    void Awake()
+    {
+        if (instance)
+        {
+            DestroyImmediate(gameObject);
+            return;
+        }
+        instance = this;
+        //DontDestroyOnLoad(gameObject);
+    }
+
+    // Use this for initialization
+    void Start () {
         animus = 100.0f;
         animusBurnRate = 0.0f;
         _animusOfLastDeathNotification = 100.0f;
@@ -52,7 +72,7 @@ public class GameController : MonoBehaviour {
 
     private string _randomDeathText()
     {
-        int index = Random.Range(0, deathTexts.Count+1);
+        int index = Random.Range(0, deathTexts.Count);
         string deathText = deathTexts[index];
         //deathTexts.RemoveAt(index);     TODO: Remove the used ones once we have more strings
         return deathText;
@@ -61,11 +81,12 @@ public class GameController : MonoBehaviour {
     private string _randomUsedItemName()
     {
         // TODO: Make sure at least one item has been used to avoid infinite loop
+        List<Item> inventory = WoundMan.Instance.inventory;
 
-		int index = Random.Range(0, player.inventory.Count);
-		while (!player.inventory [index].used) {
-			index = Random.Range (0, player.inventory.Count);
+		int index = Random.Range(0, inventory.Count);
+		while (!inventory [index].used) {
+			index = Random.Range (0, inventory.Count);
 		}
-		return player.inventory [index].name;
+		return inventory [index].name;
     }
 }
