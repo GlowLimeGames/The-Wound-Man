@@ -28,7 +28,7 @@ Material:
         m_Offset: {x: 0, y: 0}
     m_Floats:
     - _ColorMask: 15
-    - _FaceDilate: 0
+    - _FaceDilate: -0.02
     - _GradientScale: 11
     - _MaskSoftnessX: 0
     - _MaskSoftnessY: 0
@@ -37,7 +37,7 @@ Material:
     - _PerspectiveFilter: 0.875
     - _ScaleRatioA: 0.90909094
     - _ScaleRatioB: 1
-    - _ScaleRatioC: 0.7378985
+    - _ScaleRatioC: 0.75476474
     - _ScaleX: 1
     - _ScaleY: 1
     - _ShaderFlags: 0
@@ -58,7 +58,7 @@ Material:
     - _WeightNormal: 0
     m_Colors:
     - _ClipRect: {r: -10000, g: -10000, b: 10000, a: 10000}
-    - _FaceColor: {r: 1, g: 1, b: 1, a: 1}
+    - _FaceColor: {r: 0.9, g: 0.9, b: 0.9, a: 1}
     - _MaskCoord: {r: 0, g: 0, b: 100000, a: 100000}
     - _OutlineColor: {r: 0, g: 0, b: 0, a: 1}
     - _UnderlayColor: {r: 0, g: 0, b: 0, a: 0.5}
