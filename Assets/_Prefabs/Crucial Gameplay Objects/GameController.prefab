@@ -53,6 +53,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   itemOnMouse: {fileID: 0}
   animus: 100
+  animusBar: {fileID: 0}
   animusText: {fileID: 0}
   deathScroll: {fileID: 0}
   deathText: {fileID: 4900000, guid: 99de6849321480b41b297a181c7378a6, type: 3}

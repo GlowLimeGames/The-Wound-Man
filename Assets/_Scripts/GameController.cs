@@ -8,6 +8,7 @@ public class GameController : MonoBehaviour {
 
     public Item itemOnMouse;
     public float animus;
+    public Slider animusBar;
     public Text animusText;
     public GameObject deathScroll;
 
@@ -56,7 +57,9 @@ public class GameController : MonoBehaviour {
     // Use this for initialization
     void Start () {
         animus = 100.0f;
-        animusBurnRate = 0.0f;
+
+        // DEBUG
+        animusBurnRate = 10.0f;
         _animusOfLastDeathNotification = 100.0f;
 
         _deathTexts = deathText.text.Split('\n').ToList();
@@ -66,7 +69,8 @@ public class GameController : MonoBehaviour {
 	void Update () {
         // Burn and update animus value
         animus -= (animusBurnRate / 10) * Time.deltaTime;
-        animusText.text = "Animus: " + Mathf.Round(animus).ToString();
+        animusText.text = Mathf.Round(animus).ToString();
+        animusBar.value = animus;
 
         // Display a death message if we're at 90, 80, 70...
         if (animus < _animusOfLastDeathNotification - 10.0f)
