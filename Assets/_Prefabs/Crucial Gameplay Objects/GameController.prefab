@@ -51,12 +51,9 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 410c17f2c02bfa6408bd03fa839c64e0, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  player: {fileID: 0}
   itemOnMouse: {fileID: 0}
   animus: 100
   animusText: {fileID: 0}
   deathScroll: {fileID: 0}
-  deathTexts:
-  - Lord John Hornwyck of Stratfordshire expires suddenly and without cause! Physicians
-    are stumped by the unrelated {ITEM} lodged in his torso.
+  deathText: {fileID: 4900000, guid: 99de6849321480b41b297a181c7378a6, type: 3}
   animusBurnRate: 0

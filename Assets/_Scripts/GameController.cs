@@ -1,5 +1,6 @@
 ﻿using System.Collections;
 using System.Collections.Generic;
+using System.Linq;
 using UnityEngine;
 using UnityEngine.UI;
 
@@ -10,9 +11,11 @@ public class GameController : MonoBehaviour {
     public Text animusText;
     public GameObject deathScroll;
 
-    public List<string> deathTexts;
-
+    public TextAsset deathText;
+    
     public float animusBurnRate;
+
+    private List<string> _deathTexts;
 
     private float _animusOfLastDeathNotification;
 
@@ -25,6 +28,19 @@ public class GameController : MonoBehaviour {
         }
     }
     private static GameController instance = null;
+
+    public void DisplayDeath()
+    {
+        string text = _randomDeathText();
+        string itemName = _randomUsedItemName();
+        // TODO: We can do other replacements eventually, like random names/locations as well
+        text = text.Replace("{ITEM}", itemName);
+        deathScroll.GetComponentInChildren<Text>().text = text;
+        _animusOfLastDeathNotification = animus;
+
+        // Death scroll starts inactive
+        deathScroll.SetActive(true);
+    }
 
     void Awake()
     {
@@ -42,6 +58,8 @@ public class GameController : MonoBehaviour {
         animus = 100.0f;
         animusBurnRate = 0.0f;
         _animusOfLastDeathNotification = 100.0f;
+
+        _deathTexts = deathText.text.Split('\n').ToList();
 	}
 	
 	// Update is called once per frame
@@ -53,34 +71,38 @@ public class GameController : MonoBehaviour {
         // Display a death message if we're at 90, 80, 70...
         if (animus < _animusOfLastDeathNotification - 10.0f)
         {
-            string text = _randomDeathText();
-            string itemName = _randomUsedItemName();
-            // TODO: We can do other replacements eventually, like random names/locations as well
-            text = text.Replace("{ITEM}", itemName);
-            deathScroll.GetComponentInChildren<Text>().text = text;
-            _animusOfLastDeathNotification = animus;
-
-            // Death scroll starts inactive
-            deathScroll.SetActive(true);
+            DisplayDeath();
         }
 
-        if (Input.GetKey("escape"))
+        if (Input.GetKeyDown("escape"))
         {
             Application.Quit();
         }
+
+        // DEBUG
+        //if (Input.GetKeyDown("d"))
+        //{
+        //    DisplayDeath();
+        //}
 	}
 
     private string _randomDeathText()
     {
-        int index = Random.Range(0, deathTexts.Count);
-        string deathText = deathTexts[index];
+        int index = Random.Range(0, _deathTexts.Count);
+        string deathText = _deathTexts[index];
         //deathTexts.RemoveAt(index);     TODO: Remove the used ones once we have more strings
         return deathText;
     }
 
     private string _randomUsedItemName()
     {
-        // TODO: Make sure at least one item has been used to avoid infinite loop
+        // Make sure at least one item has been used to avoid infinite loop
+        if (!_atLeastOneItemUsed())
+        {
+            // Just use a placeholder if not
+            return "Sword";
+        }
+
         List<Item> inventory = WoundMan.Instance.inventory;
 
 		int index = Random.Range(0, inventory.Count);
@@ -88,5 +110,19 @@ public class GameController : MonoBehaviour {
 			index = Random.Range (0, inventory.Count);
 		}
 		return inventory [index].name;
+    }
+
+    private bool _atLeastOneItemUsed()
+    {
+        // Make sure at least one item has been used so far
+        List<Item> inventory = WoundMan.Instance.inventory;
+        foreach (var item in inventory)
+        {
+            if (item.used)
+            {
+                return true;
+            }
+        }
+        return false;
     }
 }

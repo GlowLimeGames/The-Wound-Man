@@ -849,6 +849,11 @@ Prefab:
       propertyPath: deathScroll
       value: 
       objectReference: {fileID: 281661926}
+    - target: {fileID: 114696644275217004, guid: abe50cb49af9d2344b9efe911d940b2d,
+        type: 2}
+      propertyPath: deathText
+      value: 
+      objectReference: {fileID: 4900000, guid: 99de6849321480b41b297a181c7378a6, type: 3}
     m_RemovedComponents: []
   m_ParentPrefab: {fileID: 100100000, guid: abe50cb49af9d2344b9efe911d940b2d, type: 2}
   m_IsPrefabParent: 0
