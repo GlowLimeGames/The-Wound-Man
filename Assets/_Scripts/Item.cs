@@ -40,6 +40,8 @@ public class Item : MonoBehaviour {
 	private SpriteMask _embeddedPart;
 	private Vector3 _embeddedPartOriginalPosition;
 
+    private Transform _arrow;
+
     private static Vector3 _tooltipPos = new Vector3(0, 250, 0);
 
 	public void Use()
@@ -60,6 +62,8 @@ public class Item : MonoBehaviour {
     {
         //_onMouse = true;
 		_removing = true;
+
+        _showArrow(reverse: false);
 
         GameController.Instance.itemOnMouse = this;
 
@@ -86,6 +90,8 @@ public class Item : MonoBehaviour {
 
 		_inserting = true;
 
+        _showArrow(reverse: true);
+        
         // Enable its collider again so it can be clicked
         GetComponent<BoxCollider2D>().enabled = true;
 
@@ -106,6 +112,10 @@ public class Item : MonoBehaviour {
 
 		_embeddedPart = GetComponentInChildren<SpriteMask> ();
 		_embeddedPartOriginalPosition = _embeddedPart.transform.localPosition;
+
+        _arrow = transform.Find("Arrow");
+
+        _hideArrow();
 
 		used = false;
 
@@ -218,11 +228,15 @@ public class Item : MonoBehaviour {
 	private void _FullyRemoveFromBody() {
 		_removing = false;
 		_onMouse = true;
+
+        _arrow.localScale = Vector3.zero;
 		// TODO: Add a blood particle effect, or something to make it obvious
 	}
 
 	private void _FullyInsertIntoBody() {
 		_inserting = false;
+
+        _arrow.localScale = Vector3.zero;
         //_embeddedPart.transform.localPosition = _embeddedPartOriginalPosition;
         GameController.Instance.itemOnMouse = null;
 	}
@@ -249,6 +263,24 @@ public class Item : MonoBehaviour {
 
 		return Mathf.Abs(angleDiff);
 	}
+
+    private void _showArrow(bool reverse=false)
+    {
+        _arrow.localScale = Vector3.one * 0.25f;
+
+        if (reverse)
+        {
+            _arrow.localEulerAngles = new Vector3(0, 0, 90);
+        } else
+        {
+            _arrow.localEulerAngles = new Vector3(0, 0, 270);
+        }
+    }
+
+    private void _hideArrow()
+    {
+        _arrow.localScale = new Vector3(0, 0, 0);
+    }
 
     private string _tooltipText()
     {
