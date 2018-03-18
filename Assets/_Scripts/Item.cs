@@ -37,9 +37,11 @@ public class Item : MonoBehaviour {
     private Vector3 _originalPos;
     private Vector3 _originalLocalPos;
 
+    // Mask hiding the part of the item that's inside the body
 	private SpriteMask _embeddedPart;
 	private Vector3 _embeddedPartOriginalPosition;
 
+    // Guide arrow for extracting/inserting into body
     private Transform _arrow;
 
     private static Vector3 _tooltipPos = new Vector3(0, 250, 0);
@@ -130,22 +132,23 @@ public class Item : MonoBehaviour {
 		if (_removing) {
 			// If the angle's close enough, slide it out for one frame
 			// TODO: Should you also be able to slide it back in?
+
+            // TODO: COuld just use a dot product and check if it's positive
 			float ang = _angleToMouse();
 			if (ang < 10.0f) {
 				// Don't set the position directly, that might teleport it outside of the body
 				Vector3 mousePos = Camera.main.ScreenToWorldPoint(Input.mousePosition);
 				Vector3 mouseDelta = mousePos - lastMousePos;
-				transform.position += mouseDelta;
 
-				// Slide spritemask that far away
-                // TODO: To avoid the kinda rough "diagonal sliding" thing happening, it might be
-                //       better to slide it only along the correct removal axis, not with the full mouseDelta
-				_embeddedPart.transform.position += (mouseDelta * -1.0f);
+                // Move it in the direction of the item's up vector, but with the magnitude of the mouse's
+                // movement along that vector.
+                // a = mouseDelta, b = transform.up
+                // To get the component of a along b, compute a dot b / |b|.
+                float mouseMagnitudeAlongVector = Vector3.Dot(mouseDelta, transform.up) / transform.up.magnitude;
+                Vector3 relativePosition = transform.up * mouseMagnitudeAlongVector;
 
-                // If it's all the way out of the body, put it on the mouse
-                //if (!_embeddedPart.bounds.Intersects (GetComponent<SpriteRenderer> ().bounds)) {
-                //	_FullyRemoveFromBody ();
-                //}
+                transform.position += relativePosition;
+                _embeddedPart.transform.position += relativePosition * -1.0f; ;
 
                 if ((-1)*_embeddedPart.transform.localPosition.y > embeddedPartLength)
                 {
@@ -171,10 +174,13 @@ public class Item : MonoBehaviour {
             if (_angleToMouse (reverse: true) < 10.0f) {
                 Vector3 mousePos = Camera.main.ScreenToWorldPoint (Input.mousePosition);
 				Vector3 mouseDelta = mousePos - lastMousePos;
-				transform.position += mouseDelta;
 
+                float mouseMagnitudeAlongVector = Vector3.Dot(mouseDelta, transform.up) / transform.up.magnitude;
+                Vector3 relativePosition = transform.up * mouseMagnitudeAlongVector;
+
+                transform.position += relativePosition;
                 // Still want the masking box to move opposite of mouseDelta.
-				_embeddedPart.transform.position += (mouseDelta * -1.0f);
+                _embeddedPart.transform.position += relativePosition * -1.0f; ;
 
                 if ((_embeddedPart.transform.localPosition.y) > _embeddedPartOriginalPosition.y)
                 {
