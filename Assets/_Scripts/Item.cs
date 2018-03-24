@@ -73,6 +73,9 @@ public class Item : MonoBehaviour {
     {
         _EnablePlayerCollider();
         state = State.OnMouse;
+ 
+        this.transform.SetParent(WoundMan.Instance.transform);
+        WoundMan.Instance.inventory.Add(this);
     }
 
     public void TakeFromBody()
@@ -99,11 +102,6 @@ public class Item : MonoBehaviour {
 
 	// Use this for initialization
 	void Start () {
-
-        // TODO: What to do about objects in the scene?
-        // Should I check if they're in the inventory first?
-        // For now, it's public and defaults to InRoom.
-        //state = State.InBody;
 
 		_embeddedPart = GetComponentInChildren<SpriteMask> ();
         _embeddedPartOriginalPosition = _embeddedPart.transform.localPosition;
