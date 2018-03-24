@@ -5,8 +5,8 @@ using UnityEngine.UI;
 
 public class Item : MonoBehaviour {
 
-    public int lethality;
-    public int efficiency;
+    public float lethality;
+    public float efficiency;
 
     public enum Quality
     {
@@ -28,22 +28,30 @@ public class Item : MonoBehaviour {
 
 	private Vector3 lastMousePos;
 
-	private Transform _activeTooltip;
-    private bool _onMouse;
-	private bool _removing;
-	private bool _inserting;
-	private Vector3 _mouseOffset;
+    public enum State
+    {
+        InRoom,
+        InBody,
+        OnMouse,
 
-    private Vector3 _originalPos;
-    private Vector3 _originalLocalPos;
+        Removing,
+        Inserting
+    }
+    public State state;
+
+    // A Tooltip prefab
+	private Transform _activeTooltip;
+
+	private Vector3 _mouseOffset;
 
     // Mask hiding the part of the item that's inside the body
 	private SpriteMask _embeddedPart;
 	private Vector3 _embeddedPartOriginalPosition;
 
-    // Guide arrow for extracting/inserting into body
+    // Guide arrow for extracting/inserting into body. Currently a child of it
     private Transform _arrow;
 
+    // Where the tooltip should spawn
     private static Vector3 _tooltipPos = new Vector3(0, 250, 0);
 
 	public void Use()
@@ -62,55 +70,32 @@ public class Item : MonoBehaviour {
 
     public void TakeFromBody()
     {
-        //_onMouse = true;
-		_removing = true;
+        _PutOnMouse();
 
+        state = State.Removing;
         _showArrow(reverse: false);
-
-        GameController.Instance.itemOnMouse = this;
-
-		Vector3 mousePos = Camera.main.ScreenToWorldPoint(Input.mousePosition);
-		Vector3 itemPos = transform.position;
-		_mouseOffset = itemPos - mousePos;
 
         // Allow this to show up in death messages
 		this.used = true;
-
-        // Disable this collider, so you can have it on the mouse but still click things
-        GetComponent<BoxCollider2D>().enabled = false;
-
-        // Enable the player collider, so it can be clicked to return it to the body
-        WoundMan.Instance.GetComponent<BoxCollider2D>().enabled = true;
     }
 
     public void ReturnToBody()
     {
-        _onMouse = false;
-
-		// TODO: redundant?
-		_removing = false;
-
-		_inserting = true;
+        _RemoveFromMouse();
+       
+        state = State.Inserting;
 
         _showArrow(reverse: true);
         
-        // Enable its collider again so it can be clicked
-        GetComponent<BoxCollider2D>().enabled = true;
-
-        // Disable player collider, to allow items to be clicked instead
-        WoundMan.Instance.GetComponent<BoxCollider2D>().enabled = false;
-
-        //GameController.Instance.itemOnMouse = null;
-        //Destroy(_activeTooltip.gameObject);
-
-        //GameController.Instance.animusBurnRate -= lethality;
     }
+
 
 	// Use this for initialization
 	void Start () {
-        _onMouse = false;
-        _originalPos = transform.position;
-        _originalLocalPos = transform.localPosition;
+
+        // TODO: What to do about objects in the scene?
+        // Should I check if they're in the inventory first?
+        state = State.InBody;
 
 		_embeddedPart = GetComponentInChildren<SpriteMask> ();
 		_embeddedPartOriginalPosition = _embeddedPart.transform.localPosition;
@@ -122,14 +107,14 @@ public class Item : MonoBehaviour {
 		used = false;
 
         // Floats between 1 and 10
-        lethality = (int)((Random.value * 9.0f) + 1.0f);
-        efficiency = (int)((Random.value * 9.0f) + 1.0f);
+        lethality = (Random.value * 9.0f) + 1.0f;
+        efficiency = (Random.value * 9.0f) + 1.0f;
 
     }
 	
 	// Update is called once per frame
 	void Update () {
-		if (_removing) {
+        if (state == State.Removing) {
 			// If the angle's close enough, slide it out for one frame
 			// TODO: Should you also be able to slide it back in?
 
@@ -159,7 +144,7 @@ public class Item : MonoBehaviour {
 			}
 		}
 
-		if (_onMouse)
+		if (state == State.OnMouse)
         {
             // Item moves with the cursor
             Vector3 mousePos = Camera.main.ScreenToWorldPoint(Input.mousePosition);
@@ -169,8 +154,10 @@ public class Item : MonoBehaviour {
             transform.position = mousePos;
         }
 
-		if (_inserting) {
-            // TODO: Still happening instantly for the hammer. Not sure why
+		if (state == State.Inserting) {
+            // TODO: Still happening instantly for the hammer. Not sure why.
+            // It seems to never complete the process of inserting...
+            // Something is wrong with the angle it's trying to match
             if (_angleToMouse (reverse: true) < 10.0f) {
                 Vector3 mousePos = Camera.main.ScreenToWorldPoint (Input.mousePosition);
 				Vector3 mouseDelta = mousePos - lastMousePos;
@@ -195,10 +182,9 @@ public class Item : MonoBehaviour {
 
     void OnMouseDown()
     {
-        if (!_onMouse)
+        if (state == State.InBody)
         {
             TakeFromBody();
-
         }
     }
 
@@ -217,7 +203,7 @@ public class Item : MonoBehaviour {
 	}
 
 	void OnMouseExit() {
-		if ((!_onMouse) && (!_removing))
+        if ((state == State.InBody) || (state == State.InRoom))
         {
             Destroy(_activeTooltip.gameObject);
         }
@@ -232,20 +218,46 @@ public class Item : MonoBehaviour {
     }
 
 	private void _FullyRemoveFromBody() {
-		_removing = false;
-		_onMouse = true;
+        state = State.OnMouse;
 
         _arrow.localScale = Vector3.zero;
 		// TODO: Add a blood particle effect, or something to make it obvious
 	}
 
 	private void _FullyInsertIntoBody() {
-		_inserting = false;
+        state = State.InBody;
 
         _arrow.localScale = Vector3.zero;
         //_embeddedPart.transform.localPosition = _embeddedPartOriginalPosition;
         GameController.Instance.itemOnMouse = null;
 	}
+
+    private void _PutOnMouse()
+    {
+        // TODO: Whoops. This doesn't quite describe "putting something on the mouse," it just prepares for inserting
+        GameController.Instance.itemOnMouse = this;
+
+        Vector3 mousePos = Camera.main.ScreenToWorldPoint(Input.mousePosition);
+        Vector3 itemPos = transform.position;
+        _mouseOffset = itemPos - mousePos;
+
+        // Disable this collider, so you can have it on the mouse but still click things
+        GetComponent<BoxCollider2D>().enabled = false;
+
+        // Enable the player collider, so it can be clicked to return it to the body
+        WoundMan.Instance.GetComponent<BoxCollider2D>().enabled = true;
+    }
+
+    private void _RemoveFromMouse()
+    {
+        state = State.Inserting;
+
+        // Enable its collider again so it can be clicked
+        GetComponent<BoxCollider2D>().enabled = true;
+
+        // Disable player collider, to allow items to be clicked instead
+        WoundMan.Instance.GetComponent<BoxCollider2D>().enabled = false;
+    }
 
 	private float _angleToMouse(bool reverse=false) {
 		float h = Input.GetAxis("Mouse X");
