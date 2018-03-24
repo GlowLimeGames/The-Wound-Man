@@ -11,12 +11,16 @@ public class GameController : MonoBehaviour {
     public Slider animusBar;
     public Text animusText;
     public GameObject deathScroll;
-
-    public TextAsset deathText;
     
     public float animusBurnRate;
 
+    public TextAsset deathText;
+    public TextAsset firstNameText;
+    public TextAsset lastNameText;
+
     private List<string> _deathTexts;
+    private List<string> _firstNames;
+    private List<string> _lastNames;
 
     private float _animusOfLastDeathNotification;
 
@@ -32,14 +36,35 @@ public class GameController : MonoBehaviour {
 
     public void DisplayDeath()
     {
-        string text = _randomDeathText();
-        string itemName = _randomUsedItemName();
-        // TODO: We can do other replacements eventually, like random names/locations as well
-        text = text.Replace("{ITEM}", itemName);
+        string victim = _randomFirstName() + " " + _randomLastName();
+        string death = _randomDeathText();
+        string text;
+
+        if (death.StartsWith(","))
+        {
+            text = victim + death;
+        } else
+        {
+            text = victim + " " + death;
+        }
+
+
+        // This replaces them all. Need to replace them one by one...
+        while (text.Contains("First Name"))
+        {
+            print("Replacement happened");
+            text = _replaceFirst(text, "First Name", _randomFirstName());
+        }
+
+        while (text.Contains("Last Name"))
+        {
+            text = _replaceFirst(text, "Last Name", _randomLastName());
+        }
+
         deathScroll.GetComponentInChildren<Text>().text = text;
         _animusOfLastDeathNotification = animus;
 
-        // Death scroll starts inactive
+        // Death scroll starts inactive, so make sure it is active now
         deathScroll.SetActive(true);
     }
 
@@ -63,10 +88,13 @@ public class GameController : MonoBehaviour {
         _animusOfLastDeathNotification = 100.0f;
 
         _deathTexts = deathText.text.Split('\n').ToList();
-	}
-	
-	// Update is called once per frame
-	void Update () {
+        _firstNames = firstNameText.text.Split('\n').ToList();
+        _lastNames = lastNameText.text.Split('\n').ToList();
+
+    }
+
+    // Update is called once per frame
+    void Update () {
         // Burn and update animus value
         animus -= (animusBurnRate / 10) * Time.deltaTime;
         animusText.text = Mathf.Round(animus).ToString();
@@ -84,11 +112,21 @@ public class GameController : MonoBehaviour {
         }
 
         // DEBUG
-        //if (Input.GetKeyDown("d"))
-        //{
-        //    DisplayDeath();
-        //}
+        if (Input.GetKeyDown("d"))
+        {
+            DisplayDeath();
+        }
 	}
+
+    private string _replaceFirst(string text, string search, string replace)
+    {
+        int pos = text.IndexOf(search);
+        if (pos < 0)
+        {
+            return text;
+        }
+        return text.Substring(0, pos) + replace + text.Substring(pos + search.Length);
+    }
 
     private string _randomDeathText()
     {
@@ -96,6 +134,18 @@ public class GameController : MonoBehaviour {
         string deathText = _deathTexts[index];
         //deathTexts.RemoveAt(index);     TODO: Remove the used ones once we have more strings
         return deathText;
+    }
+
+    private string _randomFirstName()
+    {
+        int index = Random.Range(0, _firstNames.Count);
+        return _firstNames[index];
+    }
+
+    private string _randomLastName()
+    {
+        int index = Random.Range(0, _lastNames.Count);
+        return _lastNames[index];
     }
 
     private string _randomUsedItemName()
