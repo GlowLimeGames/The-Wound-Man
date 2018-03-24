@@ -69,6 +69,12 @@ public class Item : MonoBehaviour {
 		GameController.Instance.animusBurnRate = 0.0f;
 	}
 
+    public void TakeFromRoom()
+    {
+        _EnablePlayerCollider();
+        state = State.OnMouse;
+    }
+
     public void TakeFromBody()
     {
         _EnablePlayerCollider();
@@ -96,18 +102,27 @@ public class Item : MonoBehaviour {
 
         // TODO: What to do about objects in the scene?
         // Should I check if they're in the inventory first?
-        state = State.InBody;
+        // For now, it's public and defaults to InRoom.
+        //state = State.InBody;
 
 		_embeddedPart = GetComponentInChildren<SpriteMask> ();
-		_embeddedPartOriginalPosition = _embeddedPart.transform.localPosition;
+        _embeddedPartOriginalPosition = _embeddedPart.transform.localPosition;
 
+        // Need to adjust the spritemask so it doesn't look like it's stabbed into an invisible body
+        if (state == State.InRoom)
+        {
+            Vector3 freePosition = _embeddedPart.transform.localPosition;
+            freePosition.y -= embeddedPartLength;
+            _embeddedPart.transform.localPosition = freePosition;
+        }
+		
         _arrow = transform.Find("Arrow");
 
         _hideArrow();
 
 		used = false;
 
-        // Floats between 1 and 10
+        // Floats, between 1 and 10
         lethality = (Random.value * 9.0f) + 1.0f;
         efficiency = (Random.value * 9.0f) + 1.0f;
 
@@ -166,8 +181,9 @@ public class Item : MonoBehaviour {
 
                 transform.position += relativePosition;
                 // Still want the masking box to move opposite of mouseDelta.
-                _embeddedPart.transform.position += relativePosition * -1.0f; ;
+                _embeddedPart.transform.position += relativePosition * -1.0f;
 
+                //print(_embeddedPart.transform.localPosition.y + " " +  _embeddedPartOriginalPosition.y);
                 if ((_embeddedPart.transform.localPosition.y) > _embeddedPartOriginalPosition.y)
                 {
                     _FullyInsertIntoBody();
@@ -184,6 +200,10 @@ public class Item : MonoBehaviour {
         if (state == State.InBody)
         {
             TakeFromBody();
+        } else if (state == State.InRoom)
+        {
+            TakeFromRoom();
+            GameController.Instance.itemOnMouse = this;
         }
     }
 
