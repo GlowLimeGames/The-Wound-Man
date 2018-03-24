@@ -32,6 +32,7 @@ public class Item : MonoBehaviour {
     {
         InRoom,
         InBody,
+
         OnMouse,
 
         Removing,
@@ -70,7 +71,7 @@ public class Item : MonoBehaviour {
 
     public void TakeFromBody()
     {
-        _PutOnMouse();
+        _EnablePlayerCollider();
 
         state = State.Removing;
         _showArrow(reverse: false);
@@ -155,10 +156,8 @@ public class Item : MonoBehaviour {
         }
 
 		if (state == State.Inserting) {
-            // TODO: Still happening instantly for the hammer. Not sure why.
-            // It seems to never complete the process of inserting...
-            // Something is wrong with the angle it's trying to match
-            if (_angleToMouse (reverse: true) < 10.0f) {
+            float ang = _angleToMouse(reverse: true);
+            if (ang < 10.0f) {
                 Vector3 mousePos = Camera.main.ScreenToWorldPoint (Input.mousePosition);
 				Vector3 mouseDelta = mousePos - lastMousePos;
 
@@ -219,27 +218,28 @@ public class Item : MonoBehaviour {
 
 	private void _FullyRemoveFromBody() {
         state = State.OnMouse;
+        GameController.Instance.itemOnMouse = this;
 
-        _arrow.localScale = Vector3.zero;
+        // Ensure the object is held by the mouse at the spot where it was originally grabbed
+        Vector3 mousePos = Camera.main.ScreenToWorldPoint(Input.mousePosition);
+        Vector3 itemPos = transform.position;
+        _mouseOffset = itemPos - mousePos;
+
+        _hideArrow();
 		// TODO: Add a blood particle effect, or something to make it obvious
 	}
 
 	private void _FullyInsertIntoBody() {
         state = State.InBody;
 
-        _arrow.localScale = Vector3.zero;
+        _hideArrow();
         //_embeddedPart.transform.localPosition = _embeddedPartOriginalPosition;
         GameController.Instance.itemOnMouse = null;
 	}
 
-    private void _PutOnMouse()
+    private void _EnablePlayerCollider()
     {
-        // TODO: Whoops. This doesn't quite describe "putting something on the mouse," it just prepares for inserting
-        GameController.Instance.itemOnMouse = this;
-
-        Vector3 mousePos = Camera.main.ScreenToWorldPoint(Input.mousePosition);
-        Vector3 itemPos = transform.position;
-        _mouseOffset = itemPos - mousePos;
+        // Disable item collider and enable player collider.
 
         // Disable this collider, so you can have it on the mouse but still click things
         GetComponent<BoxCollider2D>().enabled = false;
@@ -264,22 +264,17 @@ public class Item : MonoBehaviour {
 		float v = Input.GetAxis("Mouse Y");
 		float mouseAngle = Vector3.Angle (Vector3.up, new Vector3(h, v));
 
-		float angleDiff;
-		float zAngle = transform.eulerAngles.z;
+        float itemAngle;
 
         if (reverse)
         {
-            zAngle = zAngle - 180.0f;
+            itemAngle = -transform.up.z;
+        } else
+        {
+            itemAngle = transform.up.z;
         }
 
-		if (zAngle < 180) {
-			angleDiff = mouseAngle - zAngle;
-		} else {
-            angleDiff = mouseAngle - (360.0f - zAngle);
-            //angleDiff = mouseAngle - transform.rotation.eulerAngles.z - 180.0f;
-		}
-
-		return Mathf.Abs(angleDiff);
+        return Mathf.DeltaAngle(mouseAngle, itemAngle);
 	}
 
     private void _showArrow(bool reverse=false)
