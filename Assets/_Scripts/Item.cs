@@ -5,8 +5,8 @@ using UnityEngine.UI;
 
 public class Item : MonoBehaviour {
 
-    public float lethality;
-    public float efficiency;
+    public int lethality;
+    public int efficiency;
 
     public enum Quality
     {
@@ -122,8 +122,8 @@ public class Item : MonoBehaviour {
 		used = false;
 
         // Floats between 1 and 10
-        lethality = (Random.value * 9.0f) + 1.0f;
-        efficiency = (Random.value * 9.0f) + 1.0f;
+        lethality = (int)((Random.value * 9.0f) + 1.0f);
+        efficiency = (int)((Random.value * 9.0f) + 1.0f);
 
     }
 	
