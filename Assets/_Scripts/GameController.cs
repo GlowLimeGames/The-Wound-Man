@@ -84,8 +84,8 @@ public class GameController : MonoBehaviour {
         animus = 100.0f;
 
         // DEBUG
-        animusBurnRate = 10.0f;
-        _animusOfLastDeathNotification = 100.0f;
+        //animusBurnRate = 10.0f;
+        //_animusOfLastDeathNotification = 100.0f;
 
         _deathTexts = deathText.text.Split('\n').ToList();
         _firstNames = firstNameText.text.Split('\n').ToList();
