@@ -24,7 +24,7 @@ public class Obstacle : MonoBehaviour
     private float check = 0.0f;
 
     // In the middle of the screen, but below the item tooltip
-    private static Vector3 _tooltipPos = new Vector3(0, 100, 0);
+    private static Vector3 _tooltipPos = new Vector3(0, -50, 0);
 
     private static Vector3 _enduranceSliderOffset = new Vector3(0, 100, 0);
 
