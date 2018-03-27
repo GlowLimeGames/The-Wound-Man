@@ -222,16 +222,13 @@ public class Item : MonoBehaviour {
 	void OnMouseExit() {
         if ((state == State.InBody) || (state == State.InRoom))
         {
-            Destroy(_activeTooltip.gameObject);
+			_destroyIfNotNull (_activeTooltip);
         }
     }
 
     void OnDestroy()
     {
-        if (_activeTooltip != null)
-        {
-            Destroy(_activeTooltip.gameObject);
-        }
+		_destroyIfNotNull (_activeTooltip);
     }
 
 	private void _FullyRemoveFromBody() {
@@ -253,6 +250,8 @@ public class Item : MonoBehaviour {
         _hideArrow();
         //_embeddedPart.transform.localPosition = _embeddedPartOriginalPosition;
         GameController.Instance.itemOnMouse = null;
+
+		_destroyIfNotNull (_activeTooltip);
 	}
 
     private void _EnablePlayerCollider()
@@ -316,6 +315,14 @@ public class Item : MonoBehaviour {
     private string _tooltipText()
     {
 		// TODO: Any good way to style different parts of the text?
+		// If "Rich Text" is enabled in the text component, you can use HTML tags to style it...
         return this.name + "\n" + quality + "\n" + "Lethality: " + Mathf.Round(lethality).ToString() + "\n" + "Efficiency: " + Mathf.Round(efficiency).ToString();
     }
+
+	private void _destroyIfNotNull(Transform t)
+	{
+		if (t != null) {
+			Destroy (t.gameObject);
+		}
+	}
 }
