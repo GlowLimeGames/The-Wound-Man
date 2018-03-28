@@ -221,12 +221,11 @@ public class Item : MonoBehaviour {
 			_activeTooltip.SetParent (canv.transform, false);
 		}
 
-		GetComponent<SpriteRenderer> ().color = new Color (255, 255, 255);
+		GetComponent<SpriteRenderer> ().color = Color.white;
 
 	}
 
 	void OnMouseExit() {
-		print ("Mouse exited");
 
         if ((state == State.InBody) || (state == State.InRoom))
         {
