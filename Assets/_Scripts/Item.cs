@@ -49,6 +49,8 @@ public class Item : MonoBehaviour {
 	private SpriteMask _embeddedPart;
 	private Vector3 _embeddedPartOriginalPosition;
 
+	private Color _originalColor;
+
     // Guide arrow for extracting/inserting into body. Currently a child of it
     private Transform _arrow;
 
@@ -105,6 +107,8 @@ public class Item : MonoBehaviour {
 
 		_embeddedPart = GetComponentInChildren<SpriteMask> ();
         _embeddedPartOriginalPosition = _embeddedPart.transform.localPosition;
+
+		_originalColor = GetComponent<SpriteRenderer> ().color;
 
         // Need to adjust the spritemask so it doesn't look like it's stabbed into an invisible body
         if (state == State.InRoom)
@@ -217,13 +221,20 @@ public class Item : MonoBehaviour {
 			_activeTooltip.SetParent (canv.transform, false);
 		}
 
+		GetComponent<SpriteRenderer> ().color = new Color (255, 255, 255);
+
 	}
 
 	void OnMouseExit() {
+		print ("Mouse exited");
+
         if ((state == State.InBody) || (state == State.InRoom))
         {
 			_destroyIfNotNull (_activeTooltip);
+			GetComponent<SpriteRenderer> ().color = _originalColor;
         }
+
+
     }
 
     void OnDestroy()
