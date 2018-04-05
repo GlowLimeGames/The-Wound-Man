@@ -49,6 +49,8 @@ public class Item : MonoBehaviour {
 	private SpriteMask _embeddedPart;
 	private Vector3 _embeddedPartOriginalPosition;
 
+	private Color _originalColor;
+
     // Guide arrow for extracting/inserting into body. Currently a child of it
     private Transform _arrow;
 
@@ -105,6 +107,8 @@ public class Item : MonoBehaviour {
 
 		_embeddedPart = GetComponentInChildren<SpriteMask> ();
         _embeddedPartOriginalPosition = _embeddedPart.transform.localPosition;
+
+		_originalColor = GetComponent<SpriteRenderer> ().color;
 
         // Need to adjust the spritemask so it doesn't look like it's stabbed into an invisible body
         if (state == State.InRoom)
@@ -217,21 +221,24 @@ public class Item : MonoBehaviour {
 			_activeTooltip.SetParent (canv.transform, false);
 		}
 
+		GetComponent<SpriteRenderer> ().color = Color.white;
+
 	}
 
 	void OnMouseExit() {
+
         if ((state == State.InBody) || (state == State.InRoom))
         {
-            Destroy(_activeTooltip.gameObject);
+			_destroyIfNotNull (_activeTooltip);
+			GetComponent<SpriteRenderer> ().color = _originalColor;
         }
+
+
     }
 
     void OnDestroy()
     {
-        if (_activeTooltip != null)
-        {
-            Destroy(_activeTooltip.gameObject);
-        }
+		_destroyIfNotNull (_activeTooltip);
     }
 
 	private void _FullyRemoveFromBody() {
@@ -253,6 +260,8 @@ public class Item : MonoBehaviour {
         _hideArrow();
         //_embeddedPart.transform.localPosition = _embeddedPartOriginalPosition;
         GameController.Instance.itemOnMouse = null;
+
+		_destroyIfNotNull (_activeTooltip);
 	}
 
     private void _EnablePlayerCollider()
@@ -316,6 +325,14 @@ public class Item : MonoBehaviour {
     private string _tooltipText()
     {
 		// TODO: Any good way to style different parts of the text?
+		// If "Rich Text" is enabled in the text component, you can use HTML tags to style it...
         return this.name + "\n" + quality + "\n" + "Lethality: " + Mathf.Round(lethality).ToString() + "\n" + "Efficiency: " + Mathf.Round(efficiency).ToString();
     }
+
+	private void _destroyIfNotNull(Transform t)
+	{
+		if (t != null) {
+			Destroy (t.gameObject);
+		}
+	}
 }

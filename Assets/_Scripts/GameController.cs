@@ -52,7 +52,6 @@ public class GameController : MonoBehaviour {
         // This replaces them all. Need to replace them one by one...
         while (text.Contains("First Name"))
         {
-            print("Replacement happened");
             text = _replaceFirst(text, "First Name", _randomFirstName());
         }
 
