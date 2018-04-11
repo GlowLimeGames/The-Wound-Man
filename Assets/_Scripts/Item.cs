@@ -157,12 +157,21 @@ public class Item : MonoBehaviour {
                 transform.position += relativePosition;
                 _embeddedPart.transform.position += relativePosition * -1.0f; ;
 
-				print ((-1) * _embeddedPart.transform.localPosition.y + " " + embeddedPartDistance);
+				//print ((-1) * _embeddedPart.transform.localPosition.y + " " + embeddedPartDistance);
 
                 if ((-1)*_embeddedPart.transform.localPosition.y > embeddedPartDistance)
                 {
                     _FullyRemoveFromBody();
                 }
+
+				// TODO: Be able to put it back in if you change your mind
+
+				if ((_embeddedPart.transform.localPEnablePlayerColliderosition.y - 0.01f) > _embeddedPartOriginalPosition.y) {
+
+					_embeddedPart.transform.localPosition = _embeddedPartOriginalPosition;
+					_RemoveFromMouse ();
+					_FullyInsertIntoBody ();
+				}
 
                 
 			}
@@ -197,6 +206,13 @@ public class Item : MonoBehaviour {
                     _FullyInsertIntoBody();
                 }
 
+				// TODO: Be able to take it back out if you change your mind
+				/*
+				if ((-1) * _embeddedPart.transform.localPosition.y - 1.0f > embeddedPartDistance) {
+					_EnablePlayerCollider();
+					_FullyRemoveFromBody ();
+				}
+				*/
             }
 		}
 
@@ -207,7 +223,9 @@ public class Item : MonoBehaviour {
     {
         if (state == State.InBody)
         {
-            TakeFromBody();
+			if (GameController.Instance.itemOnMouse == null) {
+				TakeFromBody ();
+			}
         } else if (state == State.InRoom)
         {
             TakeFromRoom();
