@@ -166,7 +166,7 @@ public class Item : MonoBehaviour {
 
 				// TODO: Be able to put it back in if you change your mind
 
-				if ((_embeddedPart.transform.localPEnablePlayerColliderosition.y - 0.01f) > _embeddedPartOriginalPosition.y) {
+				if ((_embeddedPart.transform.localPosition.y - 0.01f) > _embeddedPartOriginalPosition.y) {
 
 					_embeddedPart.transform.localPosition = _embeddedPartOriginalPosition;
 					_RemoveFromMouse ();
@@ -291,6 +291,14 @@ public class Item : MonoBehaviour {
     private void _EnablePlayerCollider()
     {
         // Disable item collider and enable player collider.
+
+		// TODO: Adjust the player boxcollider with the offset between mouse and item embed position.
+		// Here's a start:
+		Vector3 mousePos = Camera.main.ScreenToWorldPoint(Input.mousePosition);
+		Vector3 itemPos = transform.position;
+		_mouseOffset = itemPos - mousePos;
+		print (_mouseOffset);
+
 
         // Disable this collider, so you can have it on the mouse but still click things
         GetComponent<BoxCollider2D>().enabled = false;
