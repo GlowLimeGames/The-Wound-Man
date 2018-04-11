@@ -64,3 +64,24 @@ TagManager:
   - name: Items-5
     uniqueID: 1828433781
     locked: 0
+  - name: Items-6
+    uniqueID: 155086997
+    locked: 0
+  - name: Items-7
+    uniqueID: 1562730857
+    locked: 0
+  - name: Items-8
+    uniqueID: 1963953477
+    locked: 0
+  - name: Items-9
+    uniqueID: 3345602491
+    locked: 0
+  - name: Items-10
+    uniqueID: 3231765887
+    locked: 0
+  - name: Items-11
+    uniqueID: 657943069
+    locked: 0
+  - name: Items-12
+    uniqueID: 3840213855
+    locked: 0

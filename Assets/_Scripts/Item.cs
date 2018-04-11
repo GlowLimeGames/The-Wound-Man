@@ -24,7 +24,9 @@ public class Item : MonoBehaviour {
     public Transform tooltip;
     public Canvas canv;
 
-    public float embeddedPartLength;
+	// "How far the object can slide in"
+	// More accurately, the distance between the object's center and the point at which it's consdiered embedded.
+    public float embeddedPartDistance;
 
 	private Vector3 lastMousePos;
 
@@ -53,6 +55,7 @@ public class Item : MonoBehaviour {
 
     // Guide arrow for extracting/inserting into body. Currently a child of it
     private Transform _arrow;
+	private Vector3 _arrowOriginalScale;
 
     // Where the tooltip should spawn
     private static Vector3 _tooltipPos = new Vector3(0, 250, 0);
@@ -114,11 +117,12 @@ public class Item : MonoBehaviour {
         if (state == State.InRoom)
         {
             Vector3 freePosition = _embeddedPart.transform.localPosition;
-            freePosition.y -= embeddedPartLength;
+            freePosition.y -= embeddedPartDistance;
             _embeddedPart.transform.localPosition = freePosition;
         }
 		
         _arrow = transform.Find("Arrow");
+		_arrowOriginalScale = transform.localScale;
 
         _hideArrow();
 
@@ -153,7 +157,9 @@ public class Item : MonoBehaviour {
                 transform.position += relativePosition;
                 _embeddedPart.transform.position += relativePosition * -1.0f; ;
 
-                if ((-1)*_embeddedPart.transform.localPosition.y > embeddedPartLength)
+				print ((-1) * _embeddedPart.transform.localPosition.y + " " + embeddedPartDistance);
+
+                if ((-1)*_embeddedPart.transform.localPosition.y > embeddedPartDistance)
                 {
                     _FullyRemoveFromBody();
                 }
@@ -306,7 +312,7 @@ public class Item : MonoBehaviour {
 
     private void _showArrow(bool reverse=false)
     {
-        _arrow.localScale = Vector3.one * 0.25f;
+		_arrow.localScale = _arrowOriginalScale;
 
         if (reverse)
         {
