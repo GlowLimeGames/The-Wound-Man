@@ -24,7 +24,9 @@ public class Item : MonoBehaviour {
     public Transform tooltip;
     public Canvas canv;
 
-    public float embeddedPartLength;
+	// "How far the object can slide in"
+	// More accurately, the distance between the object's center and the point at which it's consdiered embedded.
+    public float embeddedPartDistance;
 
 	private Vector3 lastMousePos;
 
@@ -53,6 +55,7 @@ public class Item : MonoBehaviour {
 
     // Guide arrow for extracting/inserting into body. Currently a child of it
     private Transform _arrow;
+	private Vector3 _arrowOriginalScale;
 
     // Where the tooltip should spawn
     private static Vector3 _tooltipPos = new Vector3(0, 250, 0);
@@ -114,11 +117,12 @@ public class Item : MonoBehaviour {
         if (state == State.InRoom)
         {
             Vector3 freePosition = _embeddedPart.transform.localPosition;
-            freePosition.y -= embeddedPartLength;
+            freePosition.y -= embeddedPartDistance;
             _embeddedPart.transform.localPosition = freePosition;
         }
 		
         _arrow = transform.Find("Arrow");
+		_arrowOriginalScale = transform.localScale;
 
         _hideArrow();
 
@@ -153,10 +157,21 @@ public class Item : MonoBehaviour {
                 transform.position += relativePosition;
                 _embeddedPart.transform.position += relativePosition * -1.0f; ;
 
-                if ((-1)*_embeddedPart.transform.localPosition.y > embeddedPartLength)
+				//print ((-1) * _embeddedPart.transform.localPosition.y + " " + embeddedPartDistance);
+
+                if ((-1)*_embeddedPart.transform.localPosition.y > embeddedPartDistance)
                 {
                     _FullyRemoveFromBody();
                 }
+
+				// TODO: Be able to put it back in if you change your mind
+
+				if ((_embeddedPart.transform.localPosition.y - 0.01f) > _embeddedPartOriginalPosition.y) {
+
+					_embeddedPart.transform.localPosition = _embeddedPartOriginalPosition;
+					_RemoveFromMouse ();
+					_FullyInsertIntoBody ();
+				}
 
                 
 			}
@@ -191,6 +206,13 @@ public class Item : MonoBehaviour {
                     _FullyInsertIntoBody();
                 }
 
+				// TODO: Be able to take it back out if you change your mind
+				/*
+				if ((-1) * _embeddedPart.transform.localPosition.y - 1.0f > embeddedPartDistance) {
+					_EnablePlayerCollider();
+					_FullyRemoveFromBody ();
+				}
+				*/
             }
 		}
 
@@ -201,7 +223,9 @@ public class Item : MonoBehaviour {
     {
         if (state == State.InBody)
         {
-            TakeFromBody();
+			if (GameController.Instance.itemOnMouse == null) {
+				TakeFromBody ();
+			}
         } else if (state == State.InRoom)
         {
             TakeFromRoom();
@@ -268,6 +292,14 @@ public class Item : MonoBehaviour {
     {
         // Disable item collider and enable player collider.
 
+		// TODO: Adjust the player boxcollider with the offset between mouse and item embed position.
+		// Here's a start:
+		Vector3 mousePos = Camera.main.ScreenToWorldPoint(Input.mousePosition);
+		Vector3 itemPos = transform.position;
+		_mouseOffset = itemPos - mousePos;
+		print (_mouseOffset);
+
+
         // Disable this collider, so you can have it on the mouse but still click things
         GetComponent<BoxCollider2D>().enabled = false;
 
@@ -306,7 +338,7 @@ public class Item : MonoBehaviour {
 
     private void _showArrow(bool reverse=false)
     {
-        _arrow.localScale = Vector3.one * 0.25f;
+		_arrow.localScale = _arrowOriginalScale;
 
         if (reverse)
         {

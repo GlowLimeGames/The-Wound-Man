@@ -46,6 +46,7 @@ public class WoundMan : MonoBehaviour {
     // Clicking on the player while holding an item returns it to the body
     void OnMouseDown()
     {
+		print ("Clicked on player");
         Item iom = GameController.Instance.itemOnMouse;
         if (iom != null)
         {

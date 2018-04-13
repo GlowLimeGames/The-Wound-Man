@@ -56,5 +56,7 @@ MonoBehaviour:
   animusBar: {fileID: 0}
   animusText: {fileID: 0}
   deathScroll: {fileID: 0}
-  deathText: {fileID: 4900000, guid: 99de6849321480b41b297a181c7378a6, type: 3}
   animusBurnRate: 0
+  deathText: {fileID: 4900000, guid: 99de6849321480b41b297a181c7378a6, type: 3}
+  firstNameText: {fileID: 4900000, guid: 03ca01846303fed46b919b0ebea8ad56, type: 3}
+  lastNameText: {fileID: 4900000, guid: fe4f6983bb69ee74e9b16a232e1072f3, type: 3}
