@@ -6,7 +6,7 @@ public class Map : MonoBehaviour {
 
 	public Room activeRoom;
 
-    private static Vector3 playerOffset = new Vector3(-6.9f, -2.87f, 0.0f);
+    private static Vector3 playerOffset = new Vector3(-6.8f, -2.72f, 0.0f);
 
 	// Make this a singleton. Can access it from objects with Map.Instance
 	public static Map Instance
@@ -42,6 +42,8 @@ public class Map : MonoBehaviour {
 
 		// Update activeRoom
 		activeRoom = room;
+
+        GameController.Instance.roomNameText.text = room.name;
 	}
 
 	// Use this for initialization

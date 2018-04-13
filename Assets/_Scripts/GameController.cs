@@ -10,7 +10,9 @@ public class GameController : MonoBehaviour {
     public float animus;
     public Slider animusBar;
     public Text animusText;
+    public Text roomNameText;
     public GameObject deathScroll;
+    
     
     public float animusBurnRate;
 

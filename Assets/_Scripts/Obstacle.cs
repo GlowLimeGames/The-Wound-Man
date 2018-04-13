@@ -84,11 +84,11 @@ public class Obstacle : MonoBehaviour
                     }
 
                     endurance -= GameController.Instance.itemOnMouse.efficiency * Time.deltaTime;
-                    clickCounter++;
 
-                    if (clickCounter == 11)
+                    if (endurance <= 0.0f)
                     {
-                        Destroy(enduranceSlider.gameObject);
+                        //Destroy(enduranceSlider.gameObject);
+                        enduranceSlider.gameObject.SetActive(false);
                         print("slider destroyed");
                     }
                     //                    decrementAmount = endurance/GameController.Instance.itemOnMouse.efficiency;
@@ -137,6 +137,7 @@ public class Obstacle : MonoBehaviour
 
     void OnDestroy()
     {
+        enduranceSlider.gameObject.SetActive(false);
         if (_activeTooltip != null)
         {
             Destroy(_activeTooltip.gameObject);
