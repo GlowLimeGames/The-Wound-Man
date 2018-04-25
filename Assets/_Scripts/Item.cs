@@ -297,14 +297,31 @@ public class Item : MonoBehaviour {
 		Vector3 mousePos = Camera.main.ScreenToWorldPoint(Input.mousePosition);
 		Vector3 itemPos = transform.position;
 		_mouseOffset = itemPos - mousePos;
-		print (_mouseOffset);
+		Vector2 _mouseToEmbeddedPart = new Vector2(_mouseOffset.x, _mouseOffset.y);
 
+		// So, this is a tricky value to get.
+		// I need to take the BoxCollider, and move it along the length of the item,
+		// along the item's angle.
+		//Vector2 bodyToEndOfItem = new Vector2(Mathf.Cos(transform.localEulerAngles.z) * transform.localScale.x,
+		//	                                  Mathf.Sin(transform.localEulerAngles.z) * transform.localScale.y);
 
+		//print ("From angle and scale " + bodyToEndOfItem);
+		Vector2 bodyToEndOfItem = new Vector2((GetComponent<SpriteRenderer> ().size.y), 0.0f);
+		bodyToEndOfItem *= WoundMan.Instance.transform.localScale.x;
+		bodyToEndOfItem *= transform.localScale.x;
+		print ("Sprite's size is: " + GetComponent<SpriteRenderer>().size.y);
+		print ("bodyToEndofItem is: " + bodyToEndOfItem);
+
+		// Hm. I do think it should depend on the mouse position, since allowing for every mouse positoin
+		// would create a pretty huge boxcollider...
+
+	
         // Disable this collider, so you can have it on the mouse but still click things
         GetComponent<BoxCollider2D>().enabled = false;
 
         // Enable the player collider, so it can be clicked to return it to the body
         WoundMan.Instance.GetComponent<BoxCollider2D>().enabled = true;
+		WoundMan.Instance.GetComponent<BoxCollider2D> ().offset = bodyToEndOfItem;
     }
 
     private void _RemoveFromMouse()
