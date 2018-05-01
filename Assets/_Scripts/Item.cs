@@ -57,15 +57,14 @@ public class Item : MonoBehaviour {
     private Transform _arrow;
 	private Vector3 _arrowOriginalScale;
 
-    // Where the tooltip should spawn
-    private static Vector3 _tooltipPos = new Vector3(0, 250, 0);
+    // Where the tooltip should spawn. Currently in the lower center of screen.
+    private static Vector3 _tooltipPos = new Vector3(350, 75, 0);
 
 	public void Use()
 	{
 		// Deal animus damage.
 		// TODO: Is it a random chance to get decreased by lethality, or does it always decrease? 
 		// Going with constant decrease for now
-		//print("Set burn rate");
 		GameController.Instance.animusBurnRate = lethality;
 	}
 
@@ -243,6 +242,8 @@ public class Item : MonoBehaviour {
             tooltipTextField.text = _tooltipText();
 
 			_activeTooltip.SetParent (canv.transform, false);
+
+            _activeTooltip.transform.position = _tooltipPos;
 		}
 
 		GetComponent<SpriteRenderer> ().color = Color.white;
@@ -297,8 +298,6 @@ public class Item : MonoBehaviour {
 		Vector3 mousePos = Camera.main.ScreenToWorldPoint(Input.mousePosition);
 		Vector3 itemPos = transform.position;
 		_mouseOffset = itemPos - mousePos;
-		print (_mouseOffset);
-
 
         // Disable this collider, so you can have it on the mouse but still click things
         GetComponent<BoxCollider2D>().enabled = false;

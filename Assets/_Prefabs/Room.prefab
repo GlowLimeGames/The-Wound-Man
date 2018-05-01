@@ -450,8 +450,9 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   endurance: 10
   objectGuarded: {fileID: 1151874735293984}
-  enduranceSlider: {fileID: 0}
   requiredQuality: 0
+  enduranceSlider: {fileID: 224851381336119298, guid: d766e49e8679f4a4a9c92b64e0df37b5,
+    type: 2}
   tooltip: {fileID: 224101115809295498, guid: ae5267cc341f01244a99ecda7a771bdd, type: 2}
   canv: {fileID: 0}
 --- !u!114 &114322245041382090

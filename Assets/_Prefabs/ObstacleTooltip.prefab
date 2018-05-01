@@ -22,7 +22,7 @@ GameObject:
   - component: {fileID: 222415811945678696}
   - component: {fileID: 114896190392640484}
   m_Layer: 5
-  m_Name: PuzzleTooltip
+  m_Name: ObstacleTooltip
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0

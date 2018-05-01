@@ -9,22 +9,23 @@ public class Obstacle : MonoBehaviour
     public float endurance;
     public GameObject objectGuarded;
 
-    // TODO: Currently this is just an object existing in the scene, a child of Canvas.
-    // Not sure which is less annoying: this, or instantiating a prefab in Start()...
-    public Slider enduranceSlider;
-
     public Item.Quality requiredQuality;
 
+    // Prefabs
+    public Transform enduranceSlider;
     public Transform tooltip;
+
     public Canvas canv;
 
+    // References to the actual transform
+    private Transform _activeSlider;
     private Transform _activeTooltip;
 
     private float clickCounter;
     private float check = 0.0f;
 
-    // Tooltip is above
-    private static Vector3 _tooltipOffset = new Vector3(0, 75, 0);
+    // Tooltip is above (unless that's too high on the screen)
+    private Vector3 _tooltipOffset = new Vector3(0, 75, 0);
 
     // Slider is below
     private static Vector3 _enduranceSliderOffset = new Vector3(0, -50, 0);
@@ -35,17 +36,10 @@ public class Obstacle : MonoBehaviour
         // Disable clicking on the object underneath
         objectGuarded.GetComponent<BoxCollider2D>().enabled = false;
 
-        // Set enduranceSlider to be above the object
-        Vector3 p = Camera.main.WorldToScreenPoint(transform.position);
-        p += _enduranceSliderOffset;
-
-        enduranceSlider.transform.position = p;
-
         // Initialize slider values
-        enduranceSlider.maxValue = endurance;
-        enduranceSlider.value = endurance;
 
-        enduranceSlider.gameObject.SetActive(false);
+
+        //enduranceSlider.gameObject.SetActive(false);
 
     }
 
@@ -75,12 +69,16 @@ public class Obstacle : MonoBehaviour
 
                 if (GameController.Instance.itemOnMouse.quality == requiredQuality)
                 {
+                    if (_activeSlider == null)
+                    {
+                        _activeSlider = _newSlider();
+                    }
 
                     // Decrease the obstacle's efficiency
-                    if (!enduranceSlider.IsActive())
+                    if (!_activeSlider.gameObject.activeSelf)
                     {
                         clickCounter = GameController.Instance.itemOnMouse.efficiency;
-                        enduranceSlider.gameObject.SetActive(true);
+                        _activeSlider.gameObject.SetActive(true);
                         GameController.Instance.itemOnMouse.Use();
                     }
 
@@ -88,14 +86,13 @@ public class Obstacle : MonoBehaviour
 
                     if (endurance <= 0.0f)
                     {
-                        //Destroy(enduranceSlider.gameObject);
-                        enduranceSlider.gameObject.SetActive(false);
+                        _activeSlider.gameObject.SetActive(false);
                         print("slider destroyed");
                     }
                     //                    decrementAmount = endurance/GameController.Instance.itemOnMouse.efficiency;
                     //                    endurance = endurance - decrementAmount;
 
-                    enduranceSlider.value = endurance;
+                    _activeSlider.GetComponent<Slider>().value = endurance;
                     //                    print (enduranceSlider.value);
                 }
             }
@@ -124,6 +121,12 @@ public class Obstacle : MonoBehaviour
 
             // Set activeTooltip to be above the object
             Vector3 p = Camera.main.WorldToScreenPoint(transform.position);
+
+            // Objects high up in the room should display a tooltip below them
+            if ((transform.localPosition.y > 3.0f) && (_tooltipOffset.y > 0.0f))
+            {
+                _tooltipOffset *= -1;
+            }
             p += _tooltipOffset;
 
             _activeTooltip.SetParent(canv.transform, false);
@@ -157,5 +160,19 @@ public class Obstacle : MonoBehaviour
     private string _tooltipText()
     {
         return this.name + "\nRequired: " + requiredQuality;
+    }
+
+    private Transform _newSlider()
+    {
+        print("Calling _newSlider()");
+        Transform activeSlider = Instantiate(enduranceSlider, Vector3.zero, Quaternion.identity);
+        // Set enduranceSlider to be above the object
+        activeSlider.SetParent(canv.transform, false);
+
+        Vector3 p = Camera.main.WorldToScreenPoint(transform.position);
+        p += _enduranceSliderOffset;
+
+        activeSlider.position = p;
+        return activeSlider;
     }
 }
