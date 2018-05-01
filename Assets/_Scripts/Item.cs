@@ -13,6 +13,7 @@ public class Item : MonoBehaviour {
         Sharp,
         Heavy,
         Narrow,
+        Long,
     };
 
     // TODO: This might change to a List<Quality>

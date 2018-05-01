@@ -36,11 +36,6 @@ public class Obstacle : MonoBehaviour
         // Disable clicking on the object underneath
         objectGuarded.GetComponent<BoxCollider2D>().enabled = false;
 
-        // Initialize slider values
-
-
-        //enduranceSlider.gameObject.SetActive(false);
-
     }
 
     // Update is called once per frame
@@ -71,7 +66,7 @@ public class Obstacle : MonoBehaviour
                 {
                     if (_activeSlider == null)
                     {
-                        _activeSlider = _newSlider();
+                        _activeSlider = _initializeSlider();
                     }
 
                     // Decrease the obstacle's efficiency
@@ -117,21 +112,7 @@ public class Obstacle : MonoBehaviour
 
         if (_activeTooltip == null)
         {
-            _activeTooltip = Instantiate(tooltip, Vector3.zero, Quaternion.identity);
-
-            // Set activeTooltip to be above the object
-            Vector3 p = Camera.main.WorldToScreenPoint(transform.position);
-
-            // Objects high up in the room should display a tooltip below them
-            if ((transform.localPosition.y > 3.0f) && (_tooltipOffset.y > 0.0f))
-            {
-                _tooltipOffset *= -1;
-            }
-            p += _tooltipOffset;
-
-            _activeTooltip.SetParent(canv.transform, false);
-
-            _activeTooltip.transform.position = p;
+            _activeTooltip = _initializeTooltip();
 
             // Set tooltip text
             Text tooltipTextField = _activeTooltip.GetComponentInChildren<Text>();
@@ -149,12 +130,15 @@ public class Obstacle : MonoBehaviour
 
     void OnDestroy()
     {
-        enduranceSlider.gameObject.SetActive(false);
+        if (_activeSlider != null)
+        {
+            Destroy(_activeSlider.gameObject);
+        }
+
         if (_activeTooltip != null)
         {
             Destroy(_activeTooltip.gameObject);
         }
-        //        Destroy (enduranceSlider.gameObject);
     }
 
     private string _tooltipText()
@@ -162,9 +146,29 @@ public class Obstacle : MonoBehaviour
         return this.name + "\nRequired: " + requiredQuality;
     }
 
-    private Transform _newSlider()
+    private Transform _initializeTooltip()
     {
-        print("Calling _newSlider()");
+        _activeTooltip = Instantiate(tooltip, Vector3.zero, Quaternion.identity);
+
+        // Set activeTooltip to be above the object
+        Vector3 p = Camera.main.WorldToScreenPoint(transform.position);
+
+        // Objects high up in the room should display a tooltip below them
+        if ((transform.localPosition.y > 3.0f) && (_tooltipOffset.y > 0.0f))
+        {
+            _tooltipOffset *= -1;
+        }
+        p += _tooltipOffset;
+
+        _activeTooltip.SetParent(canv.transform, false);
+
+        _activeTooltip.transform.position = p;
+
+        return _activeTooltip;
+    }
+
+    private Transform _initializeSlider()
+    {
         Transform activeSlider = Instantiate(enduranceSlider, Vector3.zero, Quaternion.identity);
         // Set enduranceSlider to be above the object
         activeSlider.SetParent(canv.transform, false);
