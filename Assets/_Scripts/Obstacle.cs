@@ -23,10 +23,11 @@ public class Obstacle : MonoBehaviour
     private float clickCounter;
     private float check = 0.0f;
 
-    // In the middle of the screen, but below the item tooltip
-    private static Vector3 _tooltipPos = new Vector3(0, -50, 0);
+    // Tooltip is above
+    private static Vector3 _tooltipOffset = new Vector3(0, 75, 0);
 
-    private static Vector3 _enduranceSliderOffset = new Vector3(0, 100, 0);
+    // Slider is below
+    private static Vector3 _enduranceSliderOffset = new Vector3(0, -50, 0);
 
     // Use this for initialization
     void Start()
@@ -111,7 +112,7 @@ public class Obstacle : MonoBehaviour
 
     void OnMouseDown()
     {
-        print("Mouse is down");
+
     }
 
     void OnMouseEnter()
@@ -119,13 +120,21 @@ public class Obstacle : MonoBehaviour
 
         if (_activeTooltip == null)
         {
-            _activeTooltip = Instantiate(tooltip, _tooltipPos, Quaternion.identity);
+            _activeTooltip = Instantiate(tooltip, Vector3.zero, Quaternion.identity);
+
+            // Set activeTooltip to be above the object
+            Vector3 p = Camera.main.WorldToScreenPoint(transform.position);
+            p += _tooltipOffset;
+
+            _activeTooltip.SetParent(canv.transform, false);
+
+            _activeTooltip.transform.position = p;
 
             // Set tooltip text
             Text tooltipTextField = _activeTooltip.GetComponentInChildren<Text>();
             tooltipTextField.text = _tooltipText();
 
-            _activeTooltip.SetParent(canv.transform, false);
+            
         }
 
     }
@@ -147,6 +156,6 @@ public class Obstacle : MonoBehaviour
 
     private string _tooltipText()
     {
-        return "Required: " + requiredQuality;
+        return this.name + "\nRequired: " + requiredQuality;
     }
 }

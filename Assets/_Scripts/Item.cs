@@ -340,6 +340,12 @@ public class Item : MonoBehaviour {
     {
 		_arrow.localScale = _arrowOriginalScale;
 
+        // If the item itself is flipped, the arrow must be flipped (again) too.
+        if (transform.localScale.x < 0.0f)
+        {
+            reverse = !reverse;
+        }
+
         if (reverse)
         {
             _arrow.localEulerAngles = new Vector3(0, 0, 90);
