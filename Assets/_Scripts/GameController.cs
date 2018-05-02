@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using UnityEngine;
 using UnityEngine.UI;
+using UnityEngine.SceneManagement;
 
 public class GameController : MonoBehaviour {
 
@@ -12,19 +13,22 @@ public class GameController : MonoBehaviour {
     public Text animusText;
     public Text roomNameText;
     public GameObject deathScroll;
-    
-    
-    public float animusBurnRate;
 
     public TextAsset deathText;
     public TextAsset firstNameText;
     public TextAsset lastNameText;
+
+    public static float ANIMUS_DAMAGE_PER_CLICK = 5.0f;
 
     private List<string> _deathTexts;
     private List<string> _firstNames;
     private List<string> _lastNames;
 
     private float _animusOfLastDeathNotification;
+
+    private Color _originalScrollColor;
+
+    private bool _fadingOut;
 
     // Singleton. Can access as GameController.Instance
     public static GameController Instance
@@ -35,6 +39,25 @@ public class GameController : MonoBehaviour {
         }
     }
     private static GameController instance = null;
+
+	public void AnimusDamage(float d)
+	{
+		animus -= d;
+
+		animusText.text = Mathf.Round(animus).ToString();
+		animusBar.value = animus;
+
+		// Display a death message if we're at 90, 80, 70...
+		if (animus <= _animusOfLastDeathNotification - 10.0f)
+		{
+			DisplayDeath();
+		}
+
+        if (animus <= 0.0f)
+        {
+            SceneManager.LoadScene("GameOverScreen");
+        }
+	}
 
     public void DisplayDeath()
     {
@@ -49,9 +72,8 @@ public class GameController : MonoBehaviour {
         {
             text = victim + " " + death;
         }
-
-
-        // This replaces them all. Need to replace them one by one...
+			
+        // TODO: This replaces them all. Need to replace them one by one...
         while (text.Contains("First Name"))
         {
             text = _replaceFirst(text, "First Name", _randomFirstName());
@@ -67,6 +89,9 @@ public class GameController : MonoBehaviour {
 
         // Death scroll starts inactive, so make sure it is active now
         deathScroll.SetActive(true);
+
+        StartCoroutine("FadeOutDeathText");
+        StartCoroutine("HideDeathText");
     }
 
     void Awake()
@@ -84,29 +109,17 @@ public class GameController : MonoBehaviour {
     void Start () {
         animus = 100.0f;
 
-        // DEBUG
-        //animusBurnRate = 10.0f;
-        //_animusOfLastDeathNotification = 100.0f;
+        _animusOfLastDeathNotification = 100.0f;
 
         _deathTexts = deathText.text.Split('\n').ToList();
         _firstNames = firstNameText.text.Split('\n').ToList();
         _lastNames = lastNameText.text.Split('\n').ToList();
 
+        _originalScrollColor = deathScroll.GetComponent<Image>().color;
     }
 
     // Update is called once per frame
     void Update () {
-        // Burn and update animus value
-        animus -= (animusBurnRate / 10) * Time.deltaTime;
-        animusText.text = Mathf.Round(animus).ToString();
-        animusBar.value = animus;
-
-        // Display a death message if we're at 90, 80, 70...
-        if (animus < _animusOfLastDeathNotification - 10.0f)
-        {
-            DisplayDeath();
-        }
-
         if (Input.GetKeyDown("escape"))
         {
             Application.Quit();
@@ -117,7 +130,29 @@ public class GameController : MonoBehaviour {
         {
             DisplayDeath();
         }
+
+        if (_fadingOut)
+        {
+            Color c = deathScroll.GetComponent<Image>().color;
+            c.a -= 1 * Time.deltaTime;
+            deathScroll.GetComponent<Image>().color = c;
+        }
 	}
+
+    IEnumerator FadeOutDeathText()
+    {
+        yield return new WaitForSeconds(12);
+        _fadingOut = true;
+    }
+
+    IEnumerator HideDeathText()
+    {
+        yield return new WaitForSeconds(13);
+        _fadingOut = false;
+        deathScroll.GetComponent<Image>().color = _originalScrollColor;
+        deathScroll.SetActive(false);
+
+    }
 
     private string _replaceFirst(string text, string search, string replace)
     {

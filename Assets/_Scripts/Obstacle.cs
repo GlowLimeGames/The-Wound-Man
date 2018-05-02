@@ -5,28 +5,29 @@ using UnityEngine.UI;
 
 public class Obstacle : MonoBehaviour
 {
-
-    public float endurance;
+    //public float endurance;
     public GameObject objectGuarded;
-
-    // TODO: Currently this is just an object existing in the scene, a child of Canvas.
-    // Not sure which is less annoying: this, or instantiating a prefab in Start()...
-    public Slider enduranceSlider;
 
     public Item.Quality requiredQuality;
 
+    // Prefabs
+    public Transform enduranceSlider;
     public Transform tooltip;
+
     public Canvas canv;
 
+    // References to the actual transform
+    private Transform _activeSlider;
     private Transform _activeTooltip;
 
-    private float clickCounter;
-    private float check = 0.0f;
+    //private int _numClicks = 0;
+    private int _requiredClicks;
 
-    // In the middle of the screen, but below the item tooltip
-    private static Vector3 _tooltipPos = new Vector3(0, -50, 0);
+    // Tooltip is above, or below if the obejct is high on the screen (local.y >= 3.0f)
+    private Vector3 _tooltipOffset = new Vector3(0, 75, 0);
 
-    private static Vector3 _enduranceSliderOffset = new Vector3(0, 100, 0);
+    // Slider is below
+    private static Vector3 _enduranceSliderOffset = new Vector3(0, -50, 0);
 
     // Use this for initialization
     void Start()
@@ -34,100 +35,75 @@ public class Obstacle : MonoBehaviour
         // Disable clicking on the object underneath
         objectGuarded.GetComponent<BoxCollider2D>().enabled = false;
 
-        // Set enduranceSlider to be above the object
-        Vector3 p = Camera.main.WorldToScreenPoint(transform.position);
-        p += _enduranceSliderOffset;
-
-        enduranceSlider.transform.position = p;
-
-        // Initialize slider values
-        enduranceSlider.maxValue = endurance;
-        enduranceSlider.value = endurance;
-
-        enduranceSlider.gameObject.SetActive(false);
-
+        // Objects high up in the room should display a tooltip below them
+        if (transform.localPosition.y > 3.0f)
+        {
+            _tooltipOffset *= -1;
+        }
     }
 
     // Update is called once per frame
     void Update()
     {
-        if (endurance <= 0.0)
-        {
-            // Enable clicking on the guarded object
-            if (objectGuarded != null)
-            {
-                objectGuarded.GetComponent<BoxCollider2D>().enabled = true;
-            }
 
-            GameController.Instance.itemOnMouse.DoneUsing();
-            Destroy(this.gameObject);
-        }
-    }
-
-    void OnMouseOver()
-    {
-        // Check if player is clicking on this obstacle with the right item
-        if (Input.GetMouseButton(0))
-        {
-            if (GameController.Instance.itemOnMouse != null)
-            {
-
-                if (GameController.Instance.itemOnMouse.quality == requiredQuality)
-                {
-
-                    // Decrease the obstacle's efficiency
-                    if (!enduranceSlider.IsActive())
-                    {
-                        clickCounter = GameController.Instance.itemOnMouse.efficiency;
-                        enduranceSlider.gameObject.SetActive(true);
-                        GameController.Instance.itemOnMouse.Use();
-                    }
-
-                    endurance -= GameController.Instance.itemOnMouse.efficiency * Time.deltaTime;
-
-                    if (endurance <= 0.0f)
-                    {
-                        //Destroy(enduranceSlider.gameObject);
-                        enduranceSlider.gameObject.SetActive(false);
-                        print("slider destroyed");
-                    }
-                    //                    decrementAmount = endurance/GameController.Instance.itemOnMouse.efficiency;
-                    //                    endurance = endurance - decrementAmount;
-
-                    enduranceSlider.value = endurance;
-                    //                    print (enduranceSlider.value);
-                }
-            }
-        }
-        else
-        {
-            // If mouse isn't down, pause the animus
-            if (GameController.Instance.itemOnMouse != null)
-            {
-                GameController.Instance.itemOnMouse.DoneUsing();
-            }
-        }
     }
 
     void OnMouseDown()
     {
-        print("Mouse is down");
+        // Check if player is clicking on this obstacle with the right item
+        if (GameController.Instance.itemOnMouse != null)
+        {
+            if (GameController.Instance.itemOnMouse.HasQuality(requiredQuality))
+            {
+                Slider slider;
+                if (_activeSlider == null)
+                {
+                    _activeSlider = _initializeSlider();
+                    slider = _activeSlider.GetComponent<Slider>();
+
+                    _requiredClicks = 11 - (int)GameController.Instance.itemOnMouse.efficiency;
+                    slider.maxValue = _requiredClicks;
+                    slider.GetComponent<Slider>().value = _requiredClicks;
+                }
+
+                slider = _activeSlider.GetComponent<Slider>();
+
+                // Decrease the obstacle's efficiency
+                if (!_activeSlider.gameObject.activeSelf)
+                {
+                    _activeSlider.gameObject.SetActive(true);
+                }
+
+                slider.value--;
+
+                // Potentially deal some Animus damage
+                GameController.Instance.itemOnMouse.ChanceToDamage();
+
+                if (slider.value <= 0.0f)
+                {
+                    _activeSlider.gameObject.SetActive(false);
+
+                    if (objectGuarded != null)
+                    {
+                        objectGuarded.GetComponent<BoxCollider2D>().enabled = true;
+                    }
+                    Destroy(this.gameObject);
+                }
+
+            }
+        }
     }
 
     void OnMouseEnter()
     {
-
         if (_activeTooltip == null)
         {
-            _activeTooltip = Instantiate(tooltip, _tooltipPos, Quaternion.identity);
+            _activeTooltip = _initializeTooltip();
 
             // Set tooltip text
             Text tooltipTextField = _activeTooltip.GetComponentInChildren<Text>();
             tooltipTextField.text = _tooltipText();
-
-            _activeTooltip.SetParent(canv.transform, false);
         }
-
     }
 
     void OnMouseExit()
@@ -137,16 +113,45 @@ public class Obstacle : MonoBehaviour
 
     void OnDestroy()
     {
-        enduranceSlider.gameObject.SetActive(false);
+        if (_activeSlider != null)
+        {
+            Destroy(_activeSlider.gameObject);
+        }
+
         if (_activeTooltip != null)
         {
             Destroy(_activeTooltip.gameObject);
         }
-        //        Destroy (enduranceSlider.gameObject);
     }
 
     private string _tooltipText()
     {
-        return "Required: " + requiredQuality;
+        return "<b>" + this.name + "</b>\nRequired: " + requiredQuality;
+    }
+
+    private Transform _initializeTooltip()
+    {
+        _activeTooltip = Instantiate(tooltip, Vector3.zero, Quaternion.identity);
+        _activeTooltip.SetParent(canv.transform, false);
+
+        // Set activeTooltip to be above the object
+        Vector3 p = Camera.main.WorldToScreenPoint(transform.position);
+        p += _tooltipOffset;
+        _activeTooltip.transform.position = p;
+
+        return _activeTooltip;
+    }
+
+    private Transform _initializeSlider()
+    {
+        _activeSlider = Instantiate(enduranceSlider, Vector3.zero, Quaternion.identity);
+        // Set enduranceSlider to be above the object
+        _activeSlider.SetParent(canv.transform, false);
+
+        Vector3 p = Camera.main.WorldToScreenPoint(transform.position);
+        p += _enduranceSliderOffset;
+
+        _activeSlider.position = p;
+        return _activeSlider;
     }
 }

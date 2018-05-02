@@ -3,7 +3,8 @@ using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.UI;
 
-public class Item : MonoBehaviour {
+public class Item : MonoBehaviour
+{
 
     public float lethality;
     public float efficiency;
@@ -13,22 +14,22 @@ public class Item : MonoBehaviour {
         Sharp,
         Heavy,
         Narrow,
+        Long,
     };
 
-    // TODO: This might change to a List<Quality>
-    public Quality quality;
+    public List<Quality> qualities;
 
-	public bool used;
+    public bool used;
 
     // Tooltip prefab
     public Transform tooltip;
     public Canvas canv;
 
-	// "How far the object can slide in"
-	// More accurately, the distance between the object's center and the point at which it's consdiered embedded.
+    // "How far the object can slide in"
+    // More accurately, the distance between the object's center and the point at which it's consdiered embedded.
     public float embeddedPartDistance;
 
-	private Vector3 lastMousePos;
+    private Vector3 lastMousePos;
 
     public enum State
     {
@@ -43,42 +44,38 @@ public class Item : MonoBehaviour {
     public State state;
 
     // A Tooltip prefab
-	private Transform _activeTooltip;
+    private Transform _activeTooltip;
 
-	private Vector3 _mouseOffset;
+    private Vector3 _mouseOffset;
 
     // Mask hiding the part of the item that's inside the body
-	private SpriteMask _embeddedPart;
-	private Vector3 _embeddedPartOriginalPosition;
+    private SpriteMask _embeddedPart;
+    private Vector3 _embeddedPartOriginalPosition;
 
-	private Color _originalColor;
+    private Color _originalColor;
 
     // Guide arrow for extracting/inserting into body. Currently a child of it
     private Transform _arrow;
-	private Vector3 _arrowOriginalScale;
+    private Vector3 _arrowOriginalScale;
 
-    // Where the tooltip should spawn
-    private static Vector3 _tooltipPos = new Vector3(0, 250, 0);
+    // Where the tooltip should spawn. Currently in the lower center of screen.
+    private static Vector3 _tooltipPos = new Vector3(350, 75, 0);
 
-	public void Use()
-	{
-		// Deal animus damage.
-		// TODO: Is it a random chance to get decreased by lethality, or does it always decrease? 
-		// Going with constant decrease for now
-		//print("Set burn rate");
-		GameController.Instance.animusBurnRate = lethality;
-	}
-
-	public void DoneUsing()
-	{
-		GameController.Instance.animusBurnRate = 0.0f;
-	}
+    public void ChanceToDamage()
+    {
+        float rand = Random.value * 10.0f;
+        
+        if (rand <= lethality)
+        {
+            GameController.Instance.AnimusDamage(5);
+        }
+    }
 
     public void TakeFromRoom()
     {
         _EnablePlayerCollider();
         state = State.OnMouse;
- 
+
         this.transform.SetParent(WoundMan.Instance.transform);
         WoundMan.Instance.inventory.Add(this);
     }
@@ -91,27 +88,40 @@ public class Item : MonoBehaviour {
         _showArrow(reverse: false);
 
         // Allow this to show up in death messages
-		this.used = true;
+        this.used = true;
     }
 
     public void ReturnToBody()
     {
         _RemoveFromMouse();
-       
+
         state = State.Inserting;
 
         _showArrow(reverse: true);
-        
+
+    }
+
+    public bool HasQuality(Quality q)
+    {
+        foreach (Quality r in qualities)
+        {
+            if (r == q)
+            {
+                return true;
+            }
+        }
+        return false;
     }
 
 
-	// Use this for initialization
-	void Start () {
+    // Use this for initialization
+    void Start()
+    {
 
-		_embeddedPart = GetComponentInChildren<SpriteMask> ();
+        _embeddedPart = GetComponentInChildren<SpriteMask>();
         _embeddedPartOriginalPosition = _embeddedPart.transform.localPosition;
 
-		_originalColor = GetComponent<SpriteRenderer> ().color;
+        _originalColor = GetComponent<SpriteRenderer>().color;
 
         // Need to adjust the spritemask so it doesn't look like it's stabbed into an invisible body
         if (state == State.InRoom)
@@ -120,32 +130,34 @@ public class Item : MonoBehaviour {
             freePosition.y -= embeddedPartDistance;
             _embeddedPart.transform.localPosition = freePosition;
         }
-		
+
         _arrow = transform.Find("Arrow");
-		_arrowOriginalScale = transform.localScale;
+        _arrowOriginalScale = _arrow.transform.localScale;
 
         _hideArrow();
 
-		used = false;
+        used = false;
 
         // Floats, between 1 and 10
         lethality = (Random.value * 9.0f) + 1.0f;
         efficiency = (Random.value * 9.0f) + 1.0f;
 
     }
-	
-	// Update is called once per frame
-	void Update () {
-        if (state == State.Removing) {
-			// If the angle's close enough, slide it out for one frame
-			// TODO: Should you also be able to slide it back in?
+
+    // Update is called once per frame
+    void Update()
+    {
+        if (state == State.Removing)
+        {
+            // If the angle's close enough, slide it out for one frame
 
             // TODO: COuld just use a dot product and check if it's positive
-			float ang = _angleToMouse();
-			if (ang < 10.0f) {
-				// Don't set the position directly, that might teleport it outside of the body
-				Vector3 mousePos = Camera.main.ScreenToWorldPoint(Input.mousePosition);
-				Vector3 mouseDelta = mousePos - lastMousePos;
+            float ang = _angleToMouse();
+            if (ang < 10.0f)
+            {
+                // Don't set the position directly, that might teleport it outside of the body
+                Vector3 mousePos = Camera.main.ScreenToWorldPoint(Input.mousePosition);
+                Vector3 mouseDelta = mousePos - lastMousePos;
 
                 // Move it in the direction of the item's up vector, but with the magnitude of the mouse's
                 // movement along that vector.
@@ -157,41 +169,41 @@ public class Item : MonoBehaviour {
                 transform.position += relativePosition;
                 _embeddedPart.transform.position += relativePosition * -1.0f; ;
 
-				//print ((-1) * _embeddedPart.transform.localPosition.y + " " + embeddedPartDistance);
-
-                if ((-1)*_embeddedPart.transform.localPosition.y > embeddedPartDistance)
+                // Remove it when it's sufficiently far away
+                if ((-1) * _embeddedPart.transform.localPosition.y > embeddedPartDistance)
                 {
                     _FullyRemoveFromBody();
                 }
 
-				// TODO: Be able to put it back in if you change your mind
+                // You can put it back in if you change your mind.
+                if ((_embeddedPart.transform.localPosition.y - 0.01f) > _embeddedPartOriginalPosition.y)
+                {
 
-				if ((_embeddedPart.transform.localPosition.y - 0.01f) > _embeddedPartOriginalPosition.y) {
+                    // Reset the position slighlty so it doesn't get permanently stuck.
+                    _embeddedPart.transform.localPosition = _embeddedPartOriginalPosition;
+                    _RemoveFromMouse();
+                    _FullyInsertIntoBody();
+                }
+            }
+        }
 
-					_embeddedPart.transform.localPosition = _embeddedPartOriginalPosition;
-					_RemoveFromMouse ();
-					_FullyInsertIntoBody ();
-				}
-
-                
-			}
-		}
-
-		if (state == State.OnMouse)
+        if (state == State.OnMouse)
         {
             // Item moves with the cursor
             Vector3 mousePos = Camera.main.ScreenToWorldPoint(Input.mousePosition);
-			mousePos += _mouseOffset;
+            mousePos += _mouseOffset;
             mousePos.z = 0.0f;                // Otherwise it gets set to -10, and becomes invisible
 
             transform.position = mousePos;
         }
 
-		if (state == State.Inserting) {
+        if (state == State.Inserting)
+        {
             float ang = _angleToMouse(reverse: true);
-            if (ang < 10.0f) {
-                Vector3 mousePos = Camera.main.ScreenToWorldPoint (Input.mousePosition);
-				Vector3 mouseDelta = mousePos - lastMousePos;
+            if (ang < 10.0f)
+            {
+                Vector3 mousePos = Camera.main.ScreenToWorldPoint(Input.mousePosition);
+                Vector3 mouseDelta = mousePos - lastMousePos;
 
                 float mouseMagnitudeAlongVector = Vector3.Dot(mouseDelta, transform.up) / transform.up.magnitude;
                 Vector3 relativePosition = transform.up * mouseMagnitudeAlongVector;
@@ -200,72 +212,84 @@ public class Item : MonoBehaviour {
                 // Still want the masking box to move opposite of mouseDelta.
                 _embeddedPart.transform.position += relativePosition * -1.0f;
 
-                //print(_embeddedPart.transform.localPosition.y + " " +  _embeddedPartOriginalPosition.y);
+                // Insert it when it's sufficiently embedded
                 if ((_embeddedPart.transform.localPosition.y) > _embeddedPartOriginalPosition.y)
                 {
                     _FullyInsertIntoBody();
                 }
 
-				// TODO: Be able to take it back out if you change your mind
-				/*
-				if ((-1) * _embeddedPart.transform.localPosition.y - 1.0f > embeddedPartDistance) {
-					_EnablePlayerCollider();
-					_FullyRemoveFromBody ();
-				}
-				*/
-            }
-		}
+                // You can take it back out if you change your mind
+                if (Mathf.Abs(_embeddedPart.transform.localPosition.y) >
+                    Mathf.Abs(_embeddedPartOriginalPosition.y) + embeddedPartDistance)
+                {
+                    _EnablePlayerCollider();
+                    _FullyRemoveFromBody();
 
-		lastMousePos = Camera.main.ScreenToWorldPoint (Input.mousePosition);
-	}
+                    // Place the embedded part a better distance away from it
+                    Vector3 freePosition = _embeddedPart.transform.localPosition;
+                    freePosition.y += embeddedPartDistance * 0.5f;
+                    _embeddedPart.transform.localPosition = freePosition;
+                }
+            }
+        }
+
+        lastMousePos = Camera.main.ScreenToWorldPoint(Input.mousePosition);
+    }
 
     void OnMouseDown()
     {
         if (state == State.InBody)
         {
-			if (GameController.Instance.itemOnMouse == null) {
-				TakeFromBody ();
-			}
-        } else if (state == State.InRoom)
+            if (GameController.Instance.itemOnMouse == null)
+            {
+                TakeFromBody();
+            }
+        }
+        else if (state == State.InRoom)
         {
             TakeFromRoom();
             GameController.Instance.itemOnMouse = this;
         }
     }
 
-	void OnMouseEnter() {
+    void OnMouseEnter()
+    {
 
-		if (_activeTooltip == null) {
-			_activeTooltip = Instantiate (tooltip, _tooltipPos, Quaternion.identity);
+        if (_activeTooltip == null)
+        {
+            _activeTooltip = Instantiate(tooltip, _tooltipPos, Quaternion.identity);
 
             // Set tooltip text
             Text tooltipTextField = _activeTooltip.GetComponentInChildren<Text>();
             tooltipTextField.text = _tooltipText();
 
-			_activeTooltip.SetParent (canv.transform, false);
-		}
+            _activeTooltip.SetParent(canv.transform, false);
 
-		GetComponent<SpriteRenderer> ().color = Color.white;
+            _activeTooltip.transform.position = _tooltipPos;
+        }
 
-	}
+        GetComponent<SpriteRenderer>().color = Color.white;
 
-	void OnMouseExit() {
+    }
+
+    void OnMouseExit()
+    {
 
         if ((state == State.InBody) || (state == State.InRoom))
         {
-			_destroyIfNotNull (_activeTooltip);
-			GetComponent<SpriteRenderer> ().color = _originalColor;
+            // DEBUG
+            _destroyIfNotNull (_activeTooltip);
+            GetComponent<SpriteRenderer>().color = _originalColor;
         }
-
-
     }
 
     void OnDestroy()
     {
-		_destroyIfNotNull (_activeTooltip);
+        _destroyIfNotNull(_activeTooltip);
     }
 
-	private void _FullyRemoveFromBody() {
+    private void _FullyRemoveFromBody()
+    {
         state = State.OnMouse;
         GameController.Instance.itemOnMouse = this;
 
@@ -275,30 +299,29 @@ public class Item : MonoBehaviour {
         _mouseOffset = itemPos - mousePos;
 
         _hideArrow();
-		// TODO: Add a blood particle effect, or something to make it obvious
-	}
+        // TODO: Add a blood particle effect, or something to make it obvious
+    }
 
-	private void _FullyInsertIntoBody() {
+    private void _FullyInsertIntoBody()
+    {
         state = State.InBody;
 
         _hideArrow();
         //_embeddedPart.transform.localPosition = _embeddedPartOriginalPosition;
         GameController.Instance.itemOnMouse = null;
 
-		_destroyIfNotNull (_activeTooltip);
-	}
+        _destroyIfNotNull(_activeTooltip);
+    }
 
     private void _EnablePlayerCollider()
     {
         // Disable item collider and enable player collider.
 
-		// TODO: Adjust the player boxcollider with the offset between mouse and item embed position.
-		// Here's a start:
-		Vector3 mousePos = Camera.main.ScreenToWorldPoint(Input.mousePosition);
-		Vector3 itemPos = transform.position;
-		_mouseOffset = itemPos - mousePos;
-		print (_mouseOffset);
-
+        // TODO: Adjust the player boxcollider with the offset between mouse and item embed position.
+        // Here's a start:
+        Vector3 mousePos = Camera.main.ScreenToWorldPoint(Input.mousePosition);
+        Vector3 itemPos = transform.position;
+        _mouseOffset = itemPos - mousePos;
 
         // Disable this collider, so you can have it on the mouse but still click things
         GetComponent<BoxCollider2D>().enabled = false;
@@ -318,32 +341,41 @@ public class Item : MonoBehaviour {
         WoundMan.Instance.GetComponent<BoxCollider2D>().enabled = false;
     }
 
-	private float _angleToMouse(bool reverse=false) {
-		float h = Input.GetAxis("Mouse X");
-		float v = Input.GetAxis("Mouse Y");
-		float mouseAngle = Vector3.Angle (Vector3.up, new Vector3(h, v));
+    private float _angleToMouse(bool reverse = false)
+    {
+        float h = Input.GetAxis("Mouse X");
+        float v = Input.GetAxis("Mouse Y");
+        float mouseAngle = Vector3.Angle(Vector3.up, new Vector3(h, v));
 
         float itemAngle;
 
         if (reverse)
         {
             itemAngle = -transform.up.z;
-        } else
+        }
+        else
         {
             itemAngle = transform.up.z;
         }
 
         return Mathf.DeltaAngle(mouseAngle, itemAngle);
-	}
+    }
 
-    private void _showArrow(bool reverse=false)
+    private void _showArrow(bool reverse = false)
     {
-		_arrow.localScale = _arrowOriginalScale;
+        _arrow.localScale = _arrowOriginalScale;
+
+        // If the item itself is flipped, the arrow must be flipped (again) too.
+        if (transform.localScale.x < 0.0f)
+        {
+            reverse = !reverse;
+        }
 
         if (reverse)
         {
             _arrow.localEulerAngles = new Vector3(0, 0, 90);
-        } else
+        }
+        else
         {
             _arrow.localEulerAngles = new Vector3(0, 0, 270);
         }
@@ -351,20 +383,27 @@ public class Item : MonoBehaviour {
 
     private void _hideArrow()
     {
-        _arrow.localScale = new Vector3(0, 0, 0);
+        _arrow.localScale = Vector3.zero;
     }
 
     private string _tooltipText()
     {
-		// TODO: Any good way to style different parts of the text?
-		// If "Rich Text" is enabled in the text component, you can use HTML tags to style it...
-        return this.name + "\n" + quality + "\n" + "Lethality: " + Mathf.Round(lethality).ToString() + "\n" + "Efficiency: " + Mathf.Round(efficiency).ToString();
+        // Really ugly way to join a list of enumerators together
+        string qualityString = "";
+        foreach (Quality q in qualities)
+        {
+            qualityString += " " + q.ToString() + ",";
+        }
+        qualityString = qualityString.TrimEnd(',').TrimStart(' ');
+
+        return "<b>" + this.name + "</b>\n" + qualityString + "\n" + "Lethality: " + Mathf.Round(lethality).ToString() + "\n" + "Efficiency: " + Mathf.Round(efficiency).ToString();
     }
 
-	private void _destroyIfNotNull(Transform t)
-	{
-		if (t != null) {
-			Destroy (t.gameObject);
-		}
-	}
+    private void _destroyIfNotNull(Transform t)
+    {
+        if (t != null)
+        {
+            Destroy(t.gameObject);
+        }
+    }
 }
