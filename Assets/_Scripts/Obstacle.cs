@@ -20,10 +20,10 @@ public class Obstacle : MonoBehaviour
     private Transform _activeSlider;
     private Transform _activeTooltip;
 
-	//private int _numClicks = 0;
-	private int _requiredClicks;
+    //private int _numClicks = 0;
+    private int _requiredClicks;
 
-	// Tooltip is above, or below if the obejct is high on the screen (local.y >= 3.0f)
+    // Tooltip is above, or below if the obejct is high on the screen (local.y >= 3.0f)
     private Vector3 _tooltipOffset = new Vector3(0, 75, 0);
 
     // Slider is below
@@ -35,11 +35,11 @@ public class Obstacle : MonoBehaviour
         // Disable clicking on the object underneath
         objectGuarded.GetComponent<BoxCollider2D>().enabled = false;
 
-		// Objects high up in the room should display a tooltip below them
-		if (transform.localPosition.y > 3.0f)
-		{
-			_tooltipOffset *= -1;
-		}
+        // Objects high up in the room should display a tooltip below them
+        if (transform.localPosition.y > 3.0f)
+        {
+            _tooltipOffset *= -1;
+        }
     }
 
     // Update is called once per frame
@@ -50,45 +50,46 @@ public class Obstacle : MonoBehaviour
 
     void OnMouseDown()
     {
-	// Check if player is clicking on this obstacle with the right item
-		if (GameController.Instance.itemOnMouse != null)
-		{
-			if (GameController.Instance.itemOnMouse.HasQuality(requiredQuality))
-			{
-				if (_activeSlider == null)
-				{
-					_activeSlider = _initializeSlider();
+        // Check if player is clicking on this obstacle with the right item
+        if (GameController.Instance.itemOnMouse != null)
+        {
+            if (GameController.Instance.itemOnMouse.HasQuality(requiredQuality))
+            {
+                if (_activeSlider == null)
+                {
+                    _activeSlider = _initializeSlider();
 
-					_requiredClicks = 11 - (int)GameController.Instance.itemOnMouse.efficiency;
-					_activeSlider.GetComponent<Slider> ().maxValue = _requiredClicks;
-					_activeSlider.GetComponent<Slider> ().value = _requiredClicks;
-				}
+                    _requiredClicks = 11 - (int)GameController.Instance.itemOnMouse.efficiency;
+                    _activeSlider.GetComponent<Slider>().maxValue = _requiredClicks;
+                    _activeSlider.GetComponent<Slider>().value = _requiredClicks;
+                }
 
-				Slider slider = _activeSlider.GetComponent<Slider> ();
+                Slider slider = _activeSlider.GetComponent<Slider>();
 
-				// Decrease the obstacle's efficiency
-				if (!_activeSlider.gameObject.activeSelf)
-				{
-					_activeSlider.gameObject.SetActive(true);
-				}
+                // Decrease the obstacle's efficiency
+                if (!_activeSlider.gameObject.activeSelf)
+                {
+                    _activeSlider.gameObject.SetActive(true);
+                }
 
-				slider.value--;
+                slider.value--;
 
-				// Deal Animus damage
-				GameController.Instance.AnimusDamage(GameController.Instance.itemOnMouse.lethality);
+                // Deal Animus damage
+                GameController.Instance.AnimusDamage(GameController.Instance.itemOnMouse.lethality);
 
-				if (slider.value <= 0.0f)
-				{
-					_activeSlider.gameObject.SetActive(false);
+                if (slider.value <= 0.0f)
+                {
+                    _activeSlider.gameObject.SetActive(false);
 
-					if (objectGuarded != null) {
-						objectGuarded.GetComponent<BoxCollider2D> ().enabled = true;
-					}
-					Destroy (this.gameObject);
-				}
-					
-			}
-		}
+                    if (objectGuarded != null)
+                    {
+                        objectGuarded.GetComponent<BoxCollider2D>().enabled = true;
+                    }
+                    Destroy(this.gameObject);
+                }
+
+            }
+        }
     }
 
     void OnMouseEnter()
@@ -123,13 +124,13 @@ public class Obstacle : MonoBehaviour
 
     private string _tooltipText()
     {
-        return "<b>" +  this.name + "</b>\nRequired: " + requiredQuality;
+        return "<b>" + this.name + "</b>\nRequired: " + requiredQuality;
     }
 
     private Transform _initializeTooltip()
     {
         _activeTooltip = Instantiate(tooltip, Vector3.zero, Quaternion.identity);
-		_activeTooltip.SetParent(canv.transform, false);
+        _activeTooltip.SetParent(canv.transform, false);
 
         // Set activeTooltip to be above the object
         Vector3 p = Camera.main.WorldToScreenPoint(transform.position);

@@ -25,6 +25,10 @@ public class GameController : MonoBehaviour {
 
     private float _animusOfLastDeathNotification;
 
+    private Color _originalScrollColor;
+
+    private bool _fadingOut;
+
     // Singleton. Can access as GameController.Instance
     public static GameController Instance
     {
@@ -79,6 +83,9 @@ public class GameController : MonoBehaviour {
 
         // Death scroll starts inactive, so make sure it is active now
         deathScroll.SetActive(true);
+
+        StartCoroutine("FadeOutDeathText");
+        StartCoroutine("HideDeathText");
     }
 
     void Awake()
@@ -102,6 +109,7 @@ public class GameController : MonoBehaviour {
         _firstNames = firstNameText.text.Split('\n').ToList();
         _lastNames = lastNameText.text.Split('\n').ToList();
 
+        _originalScrollColor = deathScroll.GetComponent<Image>().color;
     }
 
     // Update is called once per frame
@@ -116,7 +124,29 @@ public class GameController : MonoBehaviour {
         {
             DisplayDeath();
         }
+
+        if (_fadingOut)
+        {
+            Color c = deathScroll.GetComponent<Image>().color;
+            c.a -= 1 * Time.deltaTime;
+            deathScroll.GetComponent<Image>().color = c;
+        }
 	}
+
+    IEnumerator FadeOutDeathText()
+    {
+        yield return new WaitForSeconds(12);
+        _fadingOut = true;
+    }
+
+    IEnumerator HideDeathText()
+    {
+        yield return new WaitForSeconds(13);
+        _fadingOut = false;
+        deathScroll.GetComponent<Image>().color = _originalScrollColor;
+        deathScroll.SetActive(false);
+
+    }
 
     private string _replaceFirst(string text, string search, string replace)
     {
