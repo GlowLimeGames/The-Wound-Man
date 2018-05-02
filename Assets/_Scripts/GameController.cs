@@ -35,6 +35,20 @@ public class GameController : MonoBehaviour {
     }
     private static GameController instance = null;
 
+	public void AnimusDamage(float d)
+	{
+		animus -= d;
+
+		animusText.text = Mathf.Round(animus).ToString();
+		animusBar.value = animus;
+
+		// Display a death message if we're at 90, 80, 70...
+		if (animus <= _animusOfLastDeathNotification - 10.0f)
+		{
+			DisplayDeath();
+		}
+	}
+
     public void DisplayDeath()
     {
         string victim = _randomFirstName() + " " + _randomLastName();
@@ -48,9 +62,8 @@ public class GameController : MonoBehaviour {
         {
             text = victim + " " + death;
         }
-
-
-        // This replaces them all. Need to replace them one by one...
+			
+        // TODO: This replaces them all. Need to replace them one by one...
         while (text.Contains("First Name"))
         {
             text = _replaceFirst(text, "First Name", _randomFirstName());
@@ -83,9 +96,7 @@ public class GameController : MonoBehaviour {
     void Start () {
         animus = 100.0f;
 
-        // DEBUG
-        //animusBurnRate = 10.0f;
-        //_animusOfLastDeathNotification = 100.0f;
+        _animusOfLastDeathNotification = 100.0f;
 
         _deathTexts = deathText.text.Split('\n').ToList();
         _firstNames = firstNameText.text.Split('\n').ToList();
@@ -95,17 +106,6 @@ public class GameController : MonoBehaviour {
 
     // Update is called once per frame
     void Update () {
-        // Burn and update animus value
-        animus -= (animusBurnRate / 10) * Time.deltaTime;
-        animusText.text = Mathf.Round(animus).ToString();
-        animusBar.value = animus;
-
-        // Display a death message if we're at 90, 80, 70...
-        if (animus < _animusOfLastDeathNotification - 10.0f)
-        {
-            DisplayDeath();
-        }
-
         if (Input.GetKeyDown("escape"))
         {
             Application.Quit();

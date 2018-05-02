@@ -17,7 +17,7 @@ public class Item : MonoBehaviour {
     };
 
     // TODO: This might change to a List<Quality>
-    public Quality quality;
+	public List<Quality> qualities;
 
 	public bool used;
 
@@ -91,6 +91,16 @@ public class Item : MonoBehaviour {
         
     }
 
+	public bool HasQuality(Quality q)
+	{
+		foreach (Quality r in qualities) {
+			if (r == q) {
+				return true;
+			}
+		}
+		return false;
+	}
+
 
 	// Use this for initialization
 	void Start () {
@@ -109,7 +119,7 @@ public class Item : MonoBehaviour {
         }
 		
         _arrow = transform.Find("Arrow");
-		_arrowOriginalScale = transform.localScale;
+		_arrowOriginalScale = _arrow.transform.localScale;
 
         _hideArrow();
 
@@ -143,8 +153,7 @@ public class Item : MonoBehaviour {
                 transform.position += relativePosition;
                 _embeddedPart.transform.position += relativePosition * -1.0f; ;
 
-				//print ((-1) * _embeddedPart.transform.localPosition.y + " " + embeddedPartDistance);
-
+				// Remove it when it's sufficiently far away
                 if ((-1)*_embeddedPart.transform.localPosition.y > embeddedPartDistance)
                 {
                     _FullyRemoveFromBody();
@@ -184,6 +193,7 @@ public class Item : MonoBehaviour {
                 // Still want the masking box to move opposite of mouseDelta.
                 _embeddedPart.transform.position += relativePosition * -1.0f;
 
+				// Insert it when it's sufficiently embedded
                 if ((_embeddedPart.transform.localPosition.y) > _embeddedPartOriginalPosition.y)
                 {
                     _FullyInsertIntoBody();
@@ -242,11 +252,10 @@ public class Item : MonoBehaviour {
 
         if ((state == State.InBody) || (state == State.InRoom))
         {
-			_destroyIfNotNull (_activeTooltip);
+			// DEBUG
+			//_destroyIfNotNull (_activeTooltip);
 			GetComponent<SpriteRenderer> ().color = _originalColor;
         }
-
-
     }
 
     void OnDestroy()
@@ -349,9 +358,14 @@ public class Item : MonoBehaviour {
 
     private string _tooltipText()
     {
-		// TODO: Any good way to style different parts of the text?
-		// If "Rich Text" is enabled in the text component, you can use HTML tags to style it...
-        return "<b>" + this.name + "</b>\n" + quality + "\n" + "Lethality: " + Mathf.Round(lethality).ToString() + "\n" + "Efficiency: " + Mathf.Round(efficiency).ToString();
+		// Really ugly way to join a list of enumerators together
+		string qualityString = "";
+		foreach (Quality q in qualities) {
+			qualityString += " " + q.ToString () + ",";
+		}
+		qualityString = qualityString.TrimEnd (',').TrimStart(' ');
+
+        return "<b>" + this.name + "</b>\n" + qualityString + "\n" + "Lethality: " + Mathf.Round(lethality).ToString() + "\n" + "Efficiency: " + Mathf.Round(efficiency).ToString();
     }
 
 	private void _destroyIfNotNull(Transform t)

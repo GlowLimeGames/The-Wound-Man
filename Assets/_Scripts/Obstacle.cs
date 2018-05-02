@@ -53,7 +53,7 @@ public class Obstacle : MonoBehaviour
 	// Check if player is clicking on this obstacle with the right item
 		if (GameController.Instance.itemOnMouse != null)
 		{
-			if (GameController.Instance.itemOnMouse.quality == requiredQuality)
+			if (GameController.Instance.itemOnMouse.HasQuality(requiredQuality))
 			{
 				if (_activeSlider == null)
 				{
@@ -73,7 +73,9 @@ public class Obstacle : MonoBehaviour
 				}
 
 				slider.value--;
-				//_numClicks++;
+
+				// Deal Animus damage
+				GameController.Instance.AnimusDamage(GameController.Instance.itemOnMouse.lethality);
 
 				if (slider.value <= 0.0f)
 				{
