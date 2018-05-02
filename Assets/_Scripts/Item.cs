@@ -64,8 +64,6 @@ public class Item : MonoBehaviour
     public void ChanceToDamage()
     {
         float rand = Random.value * 10.0f;
-
-        print(rand);
         
         if (rand <= lethality)
         {
