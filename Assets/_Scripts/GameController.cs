@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using UnityEngine;
 using UnityEngine.UI;
+using UnityEngine.SceneManagement;
 
 public class GameController : MonoBehaviour {
 
@@ -12,12 +13,12 @@ public class GameController : MonoBehaviour {
     public Text animusText;
     public Text roomNameText;
     public GameObject deathScroll;
-    
-    public float animusBurnRate;
 
     public TextAsset deathText;
     public TextAsset firstNameText;
     public TextAsset lastNameText;
+
+    public static float ANIMUS_DAMAGE_PER_CLICK = 5.0f;
 
     private List<string> _deathTexts;
     private List<string> _firstNames;
@@ -51,6 +52,11 @@ public class GameController : MonoBehaviour {
 		{
 			DisplayDeath();
 		}
+
+        if (animus <= 0.0f)
+        {
+            SceneManager.LoadScene("GameOverScreen");
+        }
 	}
 
     public void DisplayDeath()

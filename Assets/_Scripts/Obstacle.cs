@@ -55,16 +55,18 @@ public class Obstacle : MonoBehaviour
         {
             if (GameController.Instance.itemOnMouse.HasQuality(requiredQuality))
             {
+                Slider slider;
                 if (_activeSlider == null)
                 {
                     _activeSlider = _initializeSlider();
+                    slider = _activeSlider.GetComponent<Slider>();
 
                     _requiredClicks = 11 - (int)GameController.Instance.itemOnMouse.efficiency;
-                    _activeSlider.GetComponent<Slider>().maxValue = _requiredClicks;
-                    _activeSlider.GetComponent<Slider>().value = _requiredClicks;
+                    slider.maxValue = _requiredClicks;
+                    slider.GetComponent<Slider>().value = _requiredClicks;
                 }
 
-                Slider slider = _activeSlider.GetComponent<Slider>();
+                slider = _activeSlider.GetComponent<Slider>();
 
                 // Decrease the obstacle's efficiency
                 if (!_activeSlider.gameObject.activeSelf)
@@ -74,8 +76,8 @@ public class Obstacle : MonoBehaviour
 
                 slider.value--;
 
-                // Deal Animus damage
-                GameController.Instance.AnimusDamage(GameController.Instance.itemOnMouse.lethality);
+                // Potentially deal some Animus damage
+                GameController.Instance.itemOnMouse.ChanceToDamage();
 
                 if (slider.value <= 0.0f)
                 {

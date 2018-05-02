@@ -17,7 +17,6 @@ public class Item : MonoBehaviour
         Long,
     };
 
-    // TODO: This might change to a List<Quality>
     public List<Quality> qualities;
 
     public bool used;
@@ -61,6 +60,18 @@ public class Item : MonoBehaviour
 
     // Where the tooltip should spawn. Currently in the lower center of screen.
     private static Vector3 _tooltipPos = new Vector3(350, 75, 0);
+
+    public void ChanceToDamage()
+    {
+        float rand = Random.value * 10.0f;
+
+        print(rand);
+        
+        if (rand <= lethality)
+        {
+            GameController.Instance.AnimusDamage(5);
+        }
+    }
 
     public void TakeFromRoom()
     {
@@ -269,7 +280,7 @@ public class Item : MonoBehaviour
         if ((state == State.InBody) || (state == State.InRoom))
         {
             // DEBUG
-            //_destroyIfNotNull (_activeTooltip);
+            _destroyIfNotNull (_activeTooltip);
             GetComponent<SpriteRenderer>().color = _originalColor;
         }
     }
