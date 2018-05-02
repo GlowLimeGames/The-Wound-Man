@@ -61,19 +61,6 @@ public class Item : MonoBehaviour {
     // Where the tooltip should spawn. Currently in the lower center of screen.
     private static Vector3 _tooltipPos = new Vector3(350, 75, 0);
 
-	public void Use()
-	{
-		// Deal animus damage.
-		// TODO: Is it a random chance to get decreased by lethality, or does it always decrease? 
-		// Going with constant decrease for now
-		GameController.Instance.animusBurnRate = lethality;
-	}
-
-	public void DoneUsing()
-	{
-		GameController.Instance.animusBurnRate = 0.0f;
-	}
-
     public void TakeFromRoom()
     {
         _EnablePlayerCollider();
@@ -138,7 +125,6 @@ public class Item : MonoBehaviour {
 	void Update () {
         if (state == State.Removing) {
 			// If the angle's close enough, slide it out for one frame
-			// TODO: Should you also be able to slide it back in?
 
             // TODO: COuld just use a dot product and check if it's positive
 			float ang = _angleToMouse();
@@ -164,16 +150,14 @@ public class Item : MonoBehaviour {
                     _FullyRemoveFromBody();
                 }
 
-				// TODO: Be able to put it back in if you change your mind
-
+				// You can put it back in if you change your mind.
 				if ((_embeddedPart.transform.localPosition.y - 0.01f) > _embeddedPartOriginalPosition.y) {
 
+					// Reset the position slighlty so it doesn't get permanently stuck.
 					_embeddedPart.transform.localPosition = _embeddedPartOriginalPosition;
 					_RemoveFromMouse ();
 					_FullyInsertIntoBody ();
 				}
-
-                
 			}
 		}
 
@@ -200,19 +184,22 @@ public class Item : MonoBehaviour {
                 // Still want the masking box to move opposite of mouseDelta.
                 _embeddedPart.transform.position += relativePosition * -1.0f;
 
-                //print(_embeddedPart.transform.localPosition.y + " " +  _embeddedPartOriginalPosition.y);
                 if ((_embeddedPart.transform.localPosition.y) > _embeddedPartOriginalPosition.y)
                 {
                     _FullyInsertIntoBody();
                 }
 
-				// TODO: Be able to take it back out if you change your mind
-				/*
-				if ((-1) * _embeddedPart.transform.localPosition.y - 1.0f > embeddedPartDistance) {
-					_EnablePlayerCollider();
+				// You can take it back out if you change your mind
+				if (Mathf.Abs (_embeddedPart.transform.localPosition.y) >
+				    Mathf.Abs (_embeddedPartOriginalPosition.y) + embeddedPartDistance) {
+					_EnablePlayerCollider ();
 					_FullyRemoveFromBody ();
+
+					// Place the embedded part a better distance away from it
+					Vector3 freePosition = _embeddedPart.transform.localPosition;
+					freePosition.y += embeddedPartDistance*0.5f;
+					_embeddedPart.transform.localPosition = freePosition;
 				}
-				*/
             }
 		}
 
@@ -357,14 +344,14 @@ public class Item : MonoBehaviour {
 
     private void _hideArrow()
     {
-        _arrow.localScale = new Vector3(0, 0, 0);
+		_arrow.localScale = Vector3.zero;
     }
 
     private string _tooltipText()
     {
 		// TODO: Any good way to style different parts of the text?
 		// If "Rich Text" is enabled in the text component, you can use HTML tags to style it...
-        return this.name + "\n" + quality + "\n" + "Lethality: " + Mathf.Round(lethality).ToString() + "\n" + "Efficiency: " + Mathf.Round(efficiency).ToString();
+        return "<b>" + this.name + "</b>\n" + quality + "\n" + "Lethality: " + Mathf.Round(lethality).ToString() + "\n" + "Efficiency: " + Mathf.Round(efficiency).ToString();
     }
 
 	private void _destroyIfNotNull(Transform t)

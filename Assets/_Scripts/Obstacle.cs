@@ -70,7 +70,6 @@ public class Obstacle : MonoBehaviour
 				if (!_activeSlider.gameObject.activeSelf)
 				{
 					_activeSlider.gameObject.SetActive(true);
-					GameController.Instance.itemOnMouse.Use();
 				}
 
 				slider.value--;
@@ -83,10 +82,6 @@ public class Obstacle : MonoBehaviour
 					if (objectGuarded != null) {
 						objectGuarded.GetComponent<BoxCollider2D> ().enabled = true;
 					}
-
-					// TODO: Wait, what does this do again?
-					GameController.Instance.itemOnMouse.DoneUsing ();
-
 					Destroy (this.gameObject);
 				}
 					
@@ -126,21 +121,17 @@ public class Obstacle : MonoBehaviour
 
     private string _tooltipText()
     {
-        return this.name + "\nRequired: " + requiredQuality;
+        return "<b>" +  this.name + "</b>\nRequired: " + requiredQuality;
     }
 
     private Transform _initializeTooltip()
     {
         _activeTooltip = Instantiate(tooltip, Vector3.zero, Quaternion.identity);
+		_activeTooltip.SetParent(canv.transform, false);
 
         // Set activeTooltip to be above the object
         Vector3 p = Camera.main.WorldToScreenPoint(transform.position);
-
-
         p += _tooltipOffset;
-
-        _activeTooltip.SetParent(canv.transform, false);
-
         _activeTooltip.transform.position = p;
 
         return _activeTooltip;
@@ -148,14 +139,14 @@ public class Obstacle : MonoBehaviour
 
     private Transform _initializeSlider()
     {
-        Transform activeSlider = Instantiate(enduranceSlider, Vector3.zero, Quaternion.identity);
+        _activeSlider = Instantiate(enduranceSlider, Vector3.zero, Quaternion.identity);
         // Set enduranceSlider to be above the object
-        activeSlider.SetParent(canv.transform, false);
+        _activeSlider.SetParent(canv.transform, false);
 
         Vector3 p = Camera.main.WorldToScreenPoint(transform.position);
         p += _enduranceSliderOffset;
 
-        activeSlider.position = p;
-        return activeSlider;
+        _activeSlider.position = p;
+        return _activeSlider;
     }
 }

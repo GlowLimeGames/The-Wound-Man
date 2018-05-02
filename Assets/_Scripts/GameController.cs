@@ -13,7 +13,6 @@ public class GameController : MonoBehaviour {
     public Text roomNameText;
     public GameObject deathScroll;
     
-    
     public float animusBurnRate;
 
     public TextAsset deathText;
