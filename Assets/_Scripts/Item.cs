@@ -58,8 +58,8 @@ public class Item : MonoBehaviour
     private Transform _arrow;
     private Vector3 _arrowOriginalScale;
 
-    // Where the tooltip should spawn. Currently in the lower center of screen.
-    private static Vector3 _tooltipPos = new Vector3(350, 75, 0);
+    // Where the tooltip should spawn relative to the item.
+    private static Vector3 _tooltipOffset = new Vector3(200, 75, 0);
 
     public void ChanceToDamage()
     {
@@ -117,6 +117,13 @@ public class Item : MonoBehaviour
     // Use this for initialization
     void Start()
     {
+        float _realXPos = transform.position.x * transform.localScale.x;
+
+        if (_realXPos < 3.0f)
+        {
+            _tooltipOffset = new Vector3(300, 75, 0);
+            print(this.name + " is going to be further to the right");
+        }
 
         _embeddedPart = GetComponentInChildren<SpriteMask>();
         _embeddedPartOriginalPosition = _embeddedPart.transform.localPosition;
@@ -257,15 +264,15 @@ public class Item : MonoBehaviour
 
         if (_activeTooltip == null)
         {
-            _activeTooltip = Instantiate(tooltip, _tooltipPos, Quaternion.identity);
+            _initializeTooltip();
 
             // Set tooltip text
             Text tooltipTextField = _activeTooltip.GetComponentInChildren<Text>();
             tooltipTextField.text = _tooltipText();
 
-            _activeTooltip.SetParent(canv.transform, false);
+            //_activeTooltip.SetParent(canv.transform, false);
 
-            _activeTooltip.transform.position = _tooltipPos;
+            //_activeTooltip.transform.position = _tooltipPos;
         }
 
         GetComponent<SpriteRenderer>().color = Color.white;
@@ -384,6 +391,19 @@ public class Item : MonoBehaviour
     private void _hideArrow()
     {
         _arrow.localScale = Vector3.zero;
+    }
+
+    private Transform _initializeTooltip()
+    {
+        _activeTooltip = Instantiate(tooltip, Vector3.zero, Quaternion.identity);
+        _activeTooltip.SetParent(canv.transform, false);
+
+        // Set activeTooltip to be above the object
+        Vector3 p = Camera.main.WorldToScreenPoint(transform.position);
+        p += _tooltipOffset;
+        _activeTooltip.transform.position = p;
+
+        return _activeTooltip;
     }
 
     private string _tooltipText()

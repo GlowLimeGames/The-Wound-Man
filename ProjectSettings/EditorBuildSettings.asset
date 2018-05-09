@@ -17,3 +17,6 @@ EditorBuildSettings:
   - enabled: 1
     path: Assets/_Scenes/MapTest.unity
     guid: b18e8091124e14027b85efba9afdeb9c
+  - enabled: 1
+    path: Assets/_Scenes/GameOverScreen.unity
+    guid: f9d53851c83674ee0904fa5946a93d07
