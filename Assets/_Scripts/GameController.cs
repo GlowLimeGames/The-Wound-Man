@@ -90,6 +90,10 @@ public class GameController : MonoBehaviour {
         // Death scroll starts inactive, so make sure it is active now
         deathScroll.SetActive(true);
 
+        // Stop any previous fadeout countdown
+        StopCoroutine("FadeOutDeathText");
+        StopCoroutine("HideDeathText");
+
         StartCoroutine("FadeOutDeathText");
         StartCoroutine("HideDeathText");
     }
